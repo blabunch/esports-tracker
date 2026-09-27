@@ -140,6 +140,22 @@ GitHub Actions runs lint, type checks, both test suites and production builds on
 
 ## Deployment
 
+### Free hosting: Render + Neon
+
+The repository includes a [`render.yaml`](render.yaml) Blueprint that deploys the API and the static frontend on Render's free plan. The database runs on [Neon](https://neon.com) (free Postgres that does not expire).
+
+1. Create a Neon project and copy its connection string (`postgresql://...?sslmode=require`).
+2. In Render choose **New → Blueprint**, select this repository and fill in the prompted values:
+   `DATABASE_URL`, `FACEIT_API_KEY`, `HENRIKDEV_API_KEY`,
+   `FRONTEND_URL=https://esports-tracker.onrender.com`,
+   `VITE_API_URL=https://esports-tracker-api.onrender.com/api`
+   (adjust the URLs if Render assigns different service names).
+3. Migrations run automatically on every API start.
+
+Free Render services sleep after 15 minutes without traffic; the site shows a "waking up" notice while the API starts (up to a minute).
+
+### Any other host
+
 **Backend** — any Node.js host or the included `server/Dockerfile`:
 ```bash
 npm ci && npm run build && npm run prisma:deploy && npm start

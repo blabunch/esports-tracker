@@ -6,6 +6,7 @@ import { Toaster } from 'react-hot-toast';
 import { ErrorBoundary } from './components/ErrorFallback/ErrorBoundary';
 import { Header } from './components/Header/Header';
 import { Footer } from './components/Footer/Footer';
+import { ServerWakeBanner } from './components/ServerWakeBanner/ServerWakeBanner';
 import { Home } from './pages/Home/Home';
 import { getMe } from './api/auth';
 import { User } from './api/types';
@@ -46,6 +47,7 @@ export const App: React.FC = () => {
     return (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#09090b', color: '#fff', fontFamily: 'Outfit, sans-serif' }}>
             <h2>Loading Tracker...</h2>
+            <ServerWakeBanner />
         </div>
     );
   }
@@ -82,6 +84,7 @@ export const App: React.FC = () => {
               </Suspense>
             </main>
             <Footer />
+            <ServerWakeBanner />
           </div>
         </Router>
       </QueryClientProvider>

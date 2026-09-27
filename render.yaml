@@ -1,0 +1,57 @@
+# Render Blueprint: бекенд (Node) + фронтенд (статичний сайт) на безкоштовному тарифі.
+# База даних — окремо на Neon (безкоштовний Postgres на Render видаляється через 30 днів).
+# Значення з `sync: false` Render попросить ввести під час створення Blueprint.
+services:
+  - name: esports-tracker-api
+    type: web
+    runtime: node
+    plan: free
+    rootDir: server
+    buildCommand: npm ci && npm run build
+    # Міграції перед стартом, щоб схема БД завжди відповідала коду
+    startCommand: npm run prisma:deploy && npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: FRONTEND_URL
+        sync: false
+      - key: FACEIT_API_KEY
+        sync: false
+      - key: HENRIKDEV_API_KEY
+        sync: false
+      - key: TRUST_PROXY_HOPS
+        value: "1"
+
+  - name: esports-tracker
+    type: web
+    runtime: static
+    buildCommand: npm ci && npm run build
+    staticPublishPath: ./build
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: VITE_API_URL
+        sync: false
+    # SPA: будь-який шлях (/valorant/..., /profile) віддає index.html
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable

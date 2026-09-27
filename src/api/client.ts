@@ -14,7 +14,8 @@ declare module 'axios' {
 
 export const API = axios.create({
     baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5001/api',
-    timeout: 15000,
+    // Із запасом на "пробудження" бекенду на безкоштовному хостингу (до ~1 хв)
+    timeout: 60000,
 });
 
 API.interceptors.request.use((config) => {
