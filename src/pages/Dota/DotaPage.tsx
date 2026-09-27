@@ -150,6 +150,9 @@ export const DotaPage: React.FC<{ user?: User | null }> = ({ user }) => {
 
             {!loading && data && (
                 <>
+                    {data.stats.warnings && data.stats.warnings.length > 0 && (
+                        <div className="data-warning" role="status">{data.stats.warnings.join(' ')}</div>
+                    )}
                     <DotaCard
                         data={data}
                         onMatchClick={(matchId) => setSelectedMatchId(matchId)}

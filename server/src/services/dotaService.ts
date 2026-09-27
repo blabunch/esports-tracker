@@ -29,34 +29,49 @@ const DOTA_MATCH_ID_REGEX = /^\d{1,20}$/;
 let heroesCache: { data: any[]; fetchedAt: number } | null = null;
 const HERO_CACHE_TTL = 1000 * 60 * 60 * 24; // 24 години
 
+// Довідник героїв змінюється рідко, тому кешується на добу
+const refreshHeroesCache = async () => {
+    if (heroesCache && Date.now() - heroesCache.fetchedAt < HERO_CACHE_TTL) return;
+    const heroesRes = await http.get('https://api.opendota.com/api/heroStats');
+    heroesCache = { data: heroesRes.data, fetchedAt: Date.now() };
+};
+
 export const getDotaStats = async (steamId: string, mode: string = 'all'): Promise<any> => {
     try {
-        // 🛡️ ПЕРЕВІРКА TTL ДЛЯ ГЕРОЇВ
-        if (!heroesCache || Date.now() - heroesCache.fetchedAt > HERO_CACHE_TTL) {
-            const heroesRes = await http.get('https://api.opendota.com/api/heroStats');
-            heroesCache = { data: heroesRes.data, fetchedAt: Date.now() };
-        }
-
         const accountId = resolveSteamId(steamId);
+        const playerUrl = `https://api.opendota.com/api/players/${accountId}`;
 
-        // 🔥 РОБИМО 6 ЗАПИТІВ ОДНОЧАСНО ДЛЯ МАКСИМАЛЬНОЇ ІНФИ
-        const [playerRes, wlRes, recentRes, heroesResData, totalsRes, peersRes] = await Promise.all([
-            http.get(`https://api.opendota.com/api/players/${accountId}`),
-            http.get(`https://api.opendota.com/api/players/${accountId}/wl`),
-            http.get(`https://api.opendota.com/api/players/${accountId}/recentMatches`),
-            http.get(`https://api.opendota.com/api/players/${accountId}/heroes`),
-            http.get(`https://api.opendota.com/api/players/${accountId}/totals`),
-            http.get(`https://api.opendota.com/api/players/${accountId}/peers`)
+        // Профіль і W/L обов'язкові; решта секцій — додаткові: OpenDota часто відповідає повільно
+        // або з 500, і тоді краще показати профіль без них, ніж помилку на всю сторінку
+        const [playerRes, wlRes, optional] = await Promise.all([
+            http.get(playerUrl),
+            http.get(`${playerUrl}/wl`),
+            Promise.allSettled([
+                http.get(`${playerUrl}/recentMatches`),
+                http.get(`${playerUrl}/heroes`),
+                http.get(`${playerUrl}/totals`),
+                http.get(`${playerUrl}/peers`),
+                refreshHeroesCache(),
+            ]),
         ]);
 
         if (!playerRes.data || !playerRes.data.profile) {
             throw new HttpError(404, "Private Profile or Invalid ID");
         }
 
-        const matches: any[] = recentRes.data || [];
-        const allHeroes: any[] = heroesResData.data || [];
-        const totalsData: any[] = totalsRes.data || [];
-        const peersData: any[] = peersRes.data || [];
+        const warnings: string[] = [];
+        const settledData = (index: number, section: string): any[] => {
+            const result = optional[index];
+            if (result.status === 'fulfilled') return Array.isArray(result.value?.data) ? result.value.data : [];
+            console.warn(`⚠️ OpenDota ${section} unavailable:`, result.reason?.message);
+            warnings.push(`${section} is temporarily unavailable from OpenDota.`);
+            return [];
+        };
+
+        const matches: any[] = settledData(0, 'Recent matches');
+        const allHeroes: any[] = settledData(1, 'Hero statistics');
+        const totalsData: any[] = settledData(2, 'All-time totals');
+        const peersData: any[] = settledData(3, 'Teammates');
         
         // --- 1. Обробка останніх 20 матчів ---
         let totalGpm = 0, totalXpm = 0, totalHd = 0, totalLh = 0;
@@ -199,7 +214,8 @@ export const getDotaStats = async (steamId: string, mode: string = 'all'): Promi
                 maxKills, maxDamage: formatNum(maxDamage), avgDuration: `${avgDurationMins} min`,
                 recentResults, topHeroes, chartData, signatureHero, 
                 allTimeTotals, 
-                topTeammates 
+                topTeammates,
+                warnings
             },
             matches: formattedMatches
         };
@@ -215,11 +231,8 @@ export const getDotaMatchDetails = async (matchId: string): Promise<any> => {
     }
 
     try {
-        // 1. Оновлюємо кеш героїв, якщо він порожній або прострочений
-        if (!heroesCache || Date.now() - heroesCache.fetchedAt > HERO_CACHE_TTL) {
-            const heroesRes = await http.get('https://api.opendota.com/api/heroStats');
-            heroesCache = { data: heroesRes.data, fetchedAt: Date.now() };
-        }
+        // 1. Оновлюємо кеш героїв (без нього просто не буде картинок героїв)
+        await refreshHeroesCache().catch(() => undefined);
 
         // 2. Отримуємо сирі деталі матчу
         const res = await http.get(`https://api.opendota.com/api/matches/${matchId}`);

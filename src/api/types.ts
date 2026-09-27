@@ -80,6 +80,7 @@ export interface DotaData {
         signatureHero: { name: string; img: string | null; winRate: string; games: number } | null;
         allTimeTotals: { kills: string; deaths: string; assists: string };
         topTeammates: Array<{ name: string; avatar: string; games: number; winRate: string }>;
+        warnings?: string[];
     };
     matches: MatchSummary[];
 }

@@ -1,98 +1,113 @@
 # Esports Tracker
 
-A full-stack web app for looking up player statistics in **Valorant**, **Dota 2** and **CS2 (Faceit)** — one place to search any player, see their recent form, performance trends and match scoreboards.
+[![CI](https://github.com/blabunch/esports-tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/blabunch/esports-tracker/actions/workflows/ci.yml)
+![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6)
+![License](https://img.shields.io/badge/license-MIT-green)
 
-Built with **React + TypeScript** on the frontend and **Node.js / Express + Prisma + PostgreSQL** on the backend, which aggregates data from several public game APIs.
+A full-stack web app for looking up player statistics in **Valorant**, **Dota 2** and **CS2 (Faceit)** — search any player, see their recent form and match scoreboards, and **follow how their rating changes over time**.
+
+Built with **React + TypeScript + Vite** on the frontend and **Node.js / Express + Prisma + PostgreSQL** on the backend, which aggregates data from three public game APIs.
+
+![Home page](docs/screenshots/home.jpg)
+
+| CS2 (Faceit) | Dota 2 |
+| --- | --- |
+| ![CS2 profile](docs/screenshots/cs2.jpg) | ![Dota 2 profile](docs/screenshots/dota.jpg) |
 
 ## Features
 
-**Valorant** (via HenrikDev API)
-- Search any player by Riot ID and tag
-- Current and peak rank, K/D, ACS, ADR, headshot %
-- Main role, top agents, map pool with win rates, frequent duo partner
-- ACS performance trend chart and per-match scoreboards
+**Player lookup**
+- **Valorant** (HenrikDev API): rank, peak rank, K/D, ACS, ADR, headshot %, main role, top agents, map pool, frequent duo partner
+- **Dota 2** (OpenDota API): search by Steam 32/64-bit ID or profile URL; win rate, KDA, GPM/XPM, signature hero, best teammates, all-time totals
+- **CS2** (Faceit Data API): Faceit level and ELO, K/D, headshot %, win streaks, top maps
+- Performance trend charts and clickable per-match scoreboards for every game
 
-**Dota 2** (via OpenDota API)
-- Search by Steam 32-bit ID, Steam 64-bit ID or profile URL
-- Win rate, KDA, GPM / XPM, hero damage, healing, tower damage
-- Signature hero, most played heroes, best teammates, all-time totals
-- KDA / GPM trend chart and detailed match view
+**Progress tracking**
+- Every lookup stores a daily snapshot of the player's rating
+- A progress chart shows MMR / Faceit ELO / win rate over time with the change since tracking started
 
-**CS2** (via Faceit Data API)
-- Search by Faceit nickname or profile URL
-- Faceit level and ELO, K/D, headshot %, win streaks, recent form
-- Top maps and K/D per map chart, match statistics modal
+**Shareable profile links**
+- Every profile has its own URL — `/valorant/TenZ/0505`, `/cs2/ZywOo`, `/dota/86745912` — that survives reloads and can be sent to friends
 
 **Accounts**
 - Registration and login with JWT authentication
 - Link your own Valorant, Dota 2 and Faceit accounts for one-click access
-- Synced search history and favorite profiles per user
+- Search history and favorite profiles synced to your account
 
 ## Tech Stack
 
 | Layer | Technologies |
 | --- | --- |
-| Frontend | React 19, TypeScript, React Router, Recharts, SCSS, Axios |
+| Frontend | React 19, TypeScript, Vite, TanStack Query, React Router, Recharts, SCSS |
 | Backend | Node.js, Express 5, TypeScript, Prisma ORM |
 | Database | PostgreSQL |
-| Auth & security | JWT, bcrypt, Helmet, CORS allow-list, rate limiting, input validation |
+| Testing | Vitest, Testing Library, Supertest |
+| Tooling | ESLint, GitHub Actions CI, Docker Compose |
 
 ## Architecture
 
 ```
-React SPA  ──►  Express API  ──►  HenrikDev (Valorant)
-                    │         ──►  OpenDota (Dota 2)
-                    │         ──►  Faceit Data API (CS2)
-                    ▼
-               PostgreSQL (users, search history, favorites)
+React SPA ──► Express API ──► HenrikDev (Valorant)
+                  │        ──► OpenDota (Dota 2)
+                  │        ──► Faceit Data API (CS2)
+                  ▼
+             PostgreSQL (users, search history, favorites, rating snapshots)
 ```
 
-The backend hides third-party API keys from the browser, normalizes responses from three different APIs into a consistent shape, and caches player lookups in memory for 5 minutes to stay within external rate limits.
+- The backend keeps third-party API keys away from the browser and normalizes three different APIs into a consistent response shape.
+- Player lookups are cached in memory for 5 minutes to stay within external rate limits.
+- Optional data sections degrade gracefully: if OpenDota fails to return teammates or recent matches, the profile still loads with a notice.
+- Game pages are lazy-loaded, so the initial bundle stays small.
 
-Security measures:
-- Passwords hashed with bcrypt, JWT signed with a validated secret (min. 32 chars)
-- Stricter rate limit on login / registration against brute force
-- All user input is validated and URL-encoded before it reaches external APIs
+### Security
+
+- Passwords hashed with bcrypt; JWT signed with a validated secret (min. 32 characters, HS256 only)
+- Stricter rate limit on login and registration against brute force
+- All user input is type-checked, length-limited and URL-encoded before it reaches external APIs (prevents path traversal against upstream APIs)
 - Internal errors are logged server-side and never leaked to the client
-- Security headers via Helmet and a CORS allow-list
+- Security headers via Helmet, CORS allow-list, request body size limit
+- Covered by automated tests (see `server/tests/security.test.ts`)
 
 ## Getting Started
 
-### Prerequisites
-- Node.js 20+
-- PostgreSQL database
-- API keys: [Faceit Developers](https://developers.faceit.com/), [HenrikDev](https://docs.henrikdev.xyz/)
+### Option 1: Docker (fastest)
 
-### Installation
+Requires [Docker](https://www.docker.com/).
 
 ```bash
-# 1. Frontend dependencies
+cp .env.docker.example .env   # set JWT_SECRET and your API keys
+docker compose up --build
+```
+
+Open http://localhost:8080. The API runs on http://localhost:5001, and migrations are applied automatically.
+
+### Option 2: Local development
+
+Requires Node.js 20.19+, PostgreSQL and API keys from [Faceit Developers](https://developers.faceit.com/) and [HenrikDev](https://docs.henrikdev.xyz/).
+
+```bash
+# Frontend
 npm install
+cp .env.example .env.local
 
-# 2. Backend dependencies
-cd server && npm install
+# Backend
+cd server
+npm install
+cp .env.example .env           # fill in DATABASE_URL, JWT_SECRET and API keys
+npx prisma migrate deploy
+npm run dev                    # http://localhost:5001
 
-# 3. Environment files
-cp .env.example .env.local          # in the project root
-cp server/.env.example server/.env  # fill in your secrets
-
-# 4. Database migrations
-cd server && npx prisma migrate deploy
-
-# 5. Start the backend (http://localhost:5001)
-cd server && npm run dev
-
-# 6. Start the frontend (http://localhost:3000)
-npm start
+# In another terminal, from the project root
+npm run dev                    # http://localhost:3000
 ```
 
 ### Environment Variables
 
-**Frontend** (`.env.local`)
+**Frontend** (`.env.local`, read at build time)
 
 | Variable | Description |
 | --- | --- |
-| `REACT_APP_API_URL` | Backend URL, e.g. `http://localhost:5001/api` |
+| `VITE_API_URL` | Backend URL, e.g. `http://localhost:5001/api` |
 
 **Backend** (`server/.env`)
 
@@ -105,45 +120,56 @@ npm start
 | `HENRIKDEV_API_KEY` | yes | HenrikDev Valorant API key |
 | `TRUST_PROXY_HOPS` | no | Reverse proxies in front of the server (default `1`) |
 
+## Testing
+
+```bash
+npm test                 # frontend: routing, search flow, progress chart
+npm run lint
+
+cd server
+npm test                 # backend: auth, history, favorites, security, stats normalization
+```
+
+Backend tests run against a separate database whose name must contain `test`. Locally, create one and put its URL into `server/.env.test`:
+
+```bash
+DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/tracker_test?schema=public"
+```
+
+GitHub Actions runs lint, type checks, both test suites and production builds on every push.
+
 ## Deployment
 
-**Backend**
+**Backend** — any Node.js host or the included `server/Dockerfile`:
 ```bash
-npm install && npm run build && npm run prisma:deploy && npm start
+npm ci && npm run build && npm run prisma:deploy && npm start
 ```
 Healthcheck endpoint: `GET /api/health`
 
-**Frontend**
-- Set `REACT_APP_API_URL` **before** running `npm run build`
-- Serve the `build/` folder and rewrite all unknown paths to `/index.html` (single-page app routing)
-
-## Scripts
-
-| Command | Where | Description |
-| --- | --- | --- |
-| `npm start` | root | Frontend dev server |
-| `npm run build` | root | Frontend production build |
-| `npm test -- --watchAll=false` | root | Frontend tests |
-| `npm run dev` | `server/` | Backend with auto-reload |
-| `npm run build` | `server/` | Generate Prisma client and compile TypeScript |
-| `npm test` | `server/` | Backend type check |
+**Frontend** — any static host or the included `Dockerfile` (nginx):
+- Set `VITE_API_URL` **before** running `npm run build`
+- Rewrite all unknown paths to `/index.html` (single-page app routing); the included `nginx.conf` already does this
 
 ## Project Structure
 
 ```
-├── src/                  # React frontend
-│   ├── api/              # API client and types
-│   ├── components/       # Player cards, match modals, auth, header
-│   ├── hooks/            # Data fetching, history and favorites
-│   ├── pages/            # Home, Valorant, Dota 2, CS2, History
-│   └── styles/           # SCSS variables and mixins
-└── server/               # Express backend
-    ├── prisma/           # Schema and migrations
-    └── src/
-        ├── controllers/  # Auth
-        ├── middlewares/  # JWT verification, error handler
-        ├── services/     # Valorant, Dota 2, Faceit integrations
-        └── utils/        # Cache, HTTP client, errors
+├── src/                   # React frontend
+│   ├── api/               # API client and types
+│   ├── components/        # Player cards, progress chart, match modals, auth
+│   ├── hooks/             # Player stats, favorites/history, modal behaviour
+│   ├── pages/             # Home, Valorant, Dota 2, CS2, History, 404
+│   └── routes.ts          # Shareable profile URLs
+├── server/                # Express backend
+│   ├── prisma/            # Schema and migrations
+│   ├── src/
+│   │   ├── app.ts         # Express app and routes
+│   │   ├── controllers/   # Auth
+│   │   ├── middlewares/   # JWT verification, error handler
+│   │   ├── services/      # Valorant, Dota 2, Faceit, progress tracking
+│   │   └── utils/         # Cache, HTTP client, errors
+│   └── tests/             # API tests
+├── docker-compose.yml     # Full stack: PostgreSQL + API + web
+└── .github/workflows/     # CI
 ```
 
 ## License

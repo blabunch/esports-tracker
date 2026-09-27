@@ -136,3 +136,30 @@ describe('progress', () => {
         expect(res.body).toEqual([]);
     });
 });
+
+describe('Dota stats', () => {
+    it('still returns the profile when optional OpenDota sections fail', async () => {
+        vi.spyOn(http, 'get').mockImplementation(async (url: string) => {
+            if (url.endsWith('/players/86745912')) {
+                return { data: { profile: { account_id: 86745912, personaname: 'Tester', avatarfull: '', profileurl: '' }, rank_tier: 80 } };
+            }
+            if (url.endsWith('/wl')) return { data: { win: 60, lose: 40 } };
+            throw upstreamError(500);
+        });
+
+        const res = await api().get('/api/dota/86745912');
+
+        expect(res.status).toBe(200);
+        expect(res.body.profile).toMatchObject({ accountId: 86745912, nickname: 'Tester' });
+        expect(res.body.stats.winRate).toBe('60.0');
+        expect(res.body.stats.warnings).toHaveLength(4);
+    });
+
+    it('fails when the required profile request fails', async () => {
+        vi.spyOn(http, 'get').mockRejectedValue(upstreamError(500));
+
+        const res = await api().get('/api/dota/86745912');
+
+        expect(res.status).toBe(502);
+    });
+});
