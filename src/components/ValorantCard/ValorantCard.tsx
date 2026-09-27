@@ -1,4 +1,6 @@
 import React from 'react';
+import { MatchList } from '../MatchList/MatchList';
+import { ValorantData } from '../../api/types';
 import { AreaChart, Area, Tooltip, ResponsiveContainer } from 'recharts';
 import './ValorantCard.scss';
 
@@ -10,7 +12,7 @@ const formatStat = (value: unknown, suffix = '') => {
 };
 
 interface ValorantCardProps {
-  data: any; 
+  data: ValorantData; 
   onMatchClick?: (matchId: string) => void;
 }
 
@@ -40,9 +42,9 @@ export const ValorantCard: React.FC<ValorantCardProps> = ({ data, onMatchClick }
   const recentMatches = (data.matches || []).slice(0, matchLimit);
   const bestMap = mapStats[0];
 
-  const winRateValue = parseFloat(data.stats.totalWinRate);
+  const winRateValue = Number(data.stats.totalWinRate);
   const winRateColor = Number.isFinite(winRateValue) && winRateValue >= 50 ? '#2ecc71' : '#ff4655';
-  const kdrValue = parseFloat(data.stats.kdr);
+  const kdrValue = Number(data.stats.kdr);
   const summaryTitle = !hasMatches
     ? 'No public match sample'
     : winRateValue >= 50
@@ -222,32 +224,11 @@ export const ValorantCard: React.FC<ValorantCardProps> = ({ data, onMatchClick }
 
         {/* ІСТОРІЯ МАТЧІВ */}
         {recentMatches.length > 0 && (
-          <div className="val-card__matches-list-bento">
-            <div className="val-card__section-head">
-              <h3 className="val-stat__label">Recent Matches</h3>
-              <span>Click for scoreboard</span>
-            </div>
-            <div className="val-card__matches-list">
-              {recentMatches.map((m: any, idx: number) => (
-                <button 
-                  key={idx} 
-                  type="button"
-                  onClick={() => onMatchClick && m.id && onMatchClick(m.id)}
-                  className="val-match"
-                >
-                  <div className="val-match__main">
-                    <span className={`val-match__result ${m.win ? 'is-win' : 'is-loss'}`}>{m.win ? 'VICTORY' : 'DEFEAT'}</span>
-                    <span className="val-match__map">{m.map}</span>
-                    <span className="val-match__agent">{m.agent}</span>
-                  </div>
-                  <div className="val-match__kda">
-                    <span>{m.kda} KDA</span>
-                    <span>→</span>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
+          <MatchList
+            accent="valorant"
+            onMatchClick={onMatchClick}
+            items={recentMatches.map(m => ({ id: m.id, win: m.win, primary: m.map, secondary: m.agent, trailing: `${m.kda} KDA` }))}
+          />
         )}
 
       </div>

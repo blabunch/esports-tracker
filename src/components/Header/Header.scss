@@ -3,7 +3,8 @@
   background: rgba(9, 9, 11, 0.7); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: space-between; align-items: center; padding: 20px 40px;
 
-  &__logo { font-size: 24px; font-weight: 900; color: #fff; letter-spacing: -1px; cursor: pointer; transition: 0.3s; &:hover { opacity: 0.8; } }
+  &__logo { display: flex; align-items: center; gap: 10px; font-size: 24px; font-weight: 900; color: #fff; letter-spacing: -1px; cursor: pointer; transition: 0.3s; &:hover { opacity: 0.85; .header__logo-mark { transform: rotate(-6deg) scale(1.05); } } }
+  &__logo-mark { width: 32px; height: 32px; flex-shrink: 0; transition: transform 0.3s ease; }
 
   &__nav {
       display: flex; gap: 8px; background: rgba(26, 26, 36, 0.4); padding: 6px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.05);
@@ -19,7 +20,8 @@
   &__history-btn {
       display: flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff; padding: 10px 16px; border-radius: 12px; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.3s;
       svg { width: 18px; height: 18px; }
-      &:hover, &.active { background: rgba(255, 255, 255, 0.15); transform: translateY(-2px); }
+      &:hover { background: rgba(255, 255, 255, 0.15); transform: translateY(-2px); }
+      &.active { background: rgba(255, 255, 255, 0.15); border-color: rgba(255, 255, 255, 0.25); }
   }
 
   &__profile { position: relative; }
@@ -58,7 +60,8 @@
     gap: 12px;
     flex-wrap: wrap;
 
-    &__logo { font-size: 18px; }
+    &__logo { font-size: 18px; gap: 8px; }
+    &__logo-mark { width: 24px; height: 24px; }
     &__nav { order: 3; width: 100%; justify-content: space-between; overflow-x: auto; }
     &__nav-item { flex: 1; white-space: nowrap; }
     &__right { gap: 12px; }

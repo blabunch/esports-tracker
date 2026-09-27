@@ -39,6 +39,10 @@ export const Header: React.FC<HeaderProps> = ({ user, setUser }) => {
     return (
         <header className="header">
             <button type="button" className="header__logo" onClick={() => navigate('/')} style={{cursor: 'pointer', background: 'none', border: 'none', color: 'inherit', fontFamily: 'inherit', padding: 0}}>
+                <svg className="header__logo-mark" viewBox="0 0 64 64" aria-hidden="true">
+                    <rect width="64" height="64" rx="14" fill="#ff4655" fillOpacity="0.14" />
+                    <path d="M14 44 26 26l8 10 6-8 10 16" fill="none" stroke="#ff4655" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
                 ESPORTS TRACKER
             </button>
 
@@ -49,8 +53,8 @@ export const Header: React.FC<HeaderProps> = ({ user, setUser }) => {
             </nav>
 
             <div className="header__right">
-                <button className={`header__history-btn ${isActive('/history')}`} onClick={() => navigate('/history')}>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> History
+                <button className={`header__history-btn ${isActive('/history')}`} onClick={() => navigate('/history')} aria-label="Search history">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> <span>History</span>
                 </button>
 
                 <div className="header__profile" ref={dropdownRef}>

@@ -349,6 +349,14 @@ export const getValorantStats = async (
       "🔥 Valorant API Error:",
       error.response?.data || error.message,
     );
+    // HenrikDev повертає коди помилок — перетворюємо їх на зрозумілі користувачу повідомлення
+    const henrikCode = error.response?.data?.errors?.[0]?.code;
+    if (henrikCode === 22) {
+      throw new HttpError(404, "Riot account not found. Check the name and tag.");
+    }
+    if (henrikCode === 24) {
+      throw new HttpError(404, "This account has no recent matches, so Riot does not share its stats. Try again after the player plays a game.");
+    }
     throw toUpstreamError(error, "Player not found or API limits exceeded.");
   }
 };

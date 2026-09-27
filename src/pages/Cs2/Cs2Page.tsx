@@ -6,10 +6,12 @@ import { Cs2MatchModal } from '../../components/MatchModal/Cs2MatchModal';
 import { SkeletonCard } from '../../components/Skeleton/Skeleton';
 import { SearchMemoryPanel } from '../../components/SearchMemoryPanel/SearchMemoryPanel';
 import { ProgressChart } from '../../components/ProgressChart/ProgressChart';
+import { PlayerSuggestions } from '../../components/PlayerSuggestions/PlayerSuggestions';
 import { gameApi } from '../../api/client';
 import { Cs2Data, User } from '../../api/types';
 import { ProfileShortcut, useProfileShortcuts } from '../../hooks/useProfileShortcuts';
 import { usePlayerStats } from '../../hooks/usePlayerStats';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import { HISTORY_GAME, cs2Path } from '../../routes';
 import './Cs2Page.scss';
 
@@ -70,6 +72,8 @@ export const Cs2Page: React.FC<{ user?: User | null }> = ({ user }) => {
         history: { game: HISTORY_GAME.cs2, query: nickname, isLoggedIn: canSync },
     });
 
+    useDocumentTitle(data ? `${data.profile.nickname} · CS2` : 'CS2 Tracker');
+
     const handleShortcutSelect = (shortcut: ProfileShortcut) => {
         if (shortcut.payload.nickname) navigate(cs2Path(shortcut.payload.nickname));
     };
@@ -125,6 +129,16 @@ export const Cs2Page: React.FC<{ user?: User | null }> = ({ user }) => {
                 )}
 
                 {error && !loading && <div className="search-hero__error search-hero__error--cs2" role="alert">{error.message}</div>}
+                {!data && !loading && (
+                    <PlayerSuggestions
+                        accent="cs2"
+                        items={[
+                            { label: 'ZywOo', hint: 'Vitality', path: cs2Path('ZywOo') },
+                            { label: 'donk666', hint: 'Team Spirit', path: cs2Path('donk666') },
+                            { label: 'm0NESY', hint: 'Falcons', path: cs2Path('m0NESY') },
+                        ]}
+                    />
+                )}
             </div>
 
             {!loading && (

@@ -10,6 +10,7 @@ import { gameApi } from '../../api/client';
 import { User, ValorantData } from '../../api/types';
 import { ProfileShortcut, useProfileShortcuts } from '../../hooks/useProfileShortcuts';
 import { usePlayerStats } from '../../hooks/usePlayerStats';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import { HISTORY_GAME, valorantPath } from '../../routes';
 import './ValorantPage.scss';
 
@@ -84,6 +85,8 @@ export const ValorantPage: React.FC<{ user?: User | null }> = ({ user }) => {
         history: { game: HISTORY_GAME.valorant, query: `${name}#${tag}`, isLoggedIn: canSync },
     });
 
+    useDocumentTitle(data ? `${data.profile.nickname}#${data.profile.tag} · Valorant` : 'Valorant Tracker');
+
     const handleShortcutSelect = (shortcut: ProfileShortcut) => {
         if (shortcut.payload.name && shortcut.payload.tag) navigate(valorantPath(shortcut.payload.name, shortcut.payload.tag));
     };
@@ -139,6 +142,11 @@ export const ValorantPage: React.FC<{ user?: User | null }> = ({ user }) => {
                 )}
 
                 {error && !loading && <div className="search-hero__error search-hero__error--val" role="alert">{error.message}</div>}
+                {!data && !loading && (
+                    <p className="search-hero__hint">
+                        Your Riot ID looks like <strong>Name#TAG</strong> — find it in the Valorant client next to your profile picture.
+                    </p>
+                )}
             </div>
 
             {!loading && (

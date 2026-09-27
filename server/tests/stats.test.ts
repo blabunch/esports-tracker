@@ -163,3 +163,22 @@ describe('Dota stats', () => {
         expect(res.status).toBe(502);
     });
 });
+
+describe('Valorant stats', () => {
+    const henrikError = (code: number) => new AxiosError(
+        'Request failed', 'ERR_BAD_REQUEST', undefined, undefined,
+        { status: 404, statusText: '', headers: {}, config: { headers: new AxiosHeaders() }, data: { errors: [{ code, message: 'upstream' }] } },
+    );
+
+    it.each([
+        [22, 'Riot account not found. Check the name and tag.'],
+        [24, 'This account has no recent matches'],
+    ])('explains HenrikDev error code %i', async (code, message) => {
+        vi.spyOn(http, 'get').mockRejectedValue(henrikError(code));
+
+        const res = await api().get('/api/valorant/Someone/TAG');
+
+        expect(res.status).toBe(404);
+        expect(res.body.message).toContain(message);
+    });
+});

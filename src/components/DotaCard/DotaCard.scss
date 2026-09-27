@@ -47,9 +47,10 @@
   }
 
   &__bento { 
-    flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); 
+    flex: 1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); 
     grid-auto-rows: minmax(110px, auto); gap: 16px; 
     align-content: start; /* 🔥 ОСЬ МАГІЯ ДЛЯ ФІКСУ ДІРОК */
+    > * { min-width: 0; }
   }
 
   /* 🔥 БЛОК ГРАФІКА (Повернули на місце!) */
@@ -110,10 +111,6 @@
   &--open { background: rgba(52, 152, 219, 0.1); color: #6dbcf0; border-color: rgba(52, 152, 219, 0.3); &:hover { background: rgba(52, 152, 219, 0.2); box-shadow: 0 0 15px rgba(52, 152, 219, 0.3); } }
 }
 
-.dota-card__matches-list-bento button:focus-visible {
-  outline: 3px solid rgba(217, 75, 56, 0.45);
-  outline-offset: 3px;
-}
 
 @media (max-width: 980px) {
   .dota-card {
@@ -128,7 +125,7 @@
       padding-bottom: 28px;
     }
 
-    &__bento { grid-template-columns: repeat(2, 1fr); }
+    &__bento { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     &__chart-bento,
     &__heroes-bento { grid-column: span 2; }
   }
@@ -139,13 +136,11 @@
     padding: 20px;
     border-radius: 24px;
 
-    &__bento { grid-template-columns: 1fr; }
-    &__chart-bento,
-    &__heroes-bento { grid-column: span 1; }
+    &__bento { grid-template-columns: minmax(0, 1fr); }
+
+    // Одна колонка: будь-яка плашка на всю ширину, незалежно від span у ширших брейкпоінтах
+    .dota-card__bento > * { grid-column: 1 / -1; grid-row: auto; }
+
     &__heroes { flex-direction: column; }
   }
-
-  .dota-stat,
-  .dota-stat--main,
-  .dota-stat--wide { grid-column: auto; grid-row: auto; }
 }

@@ -26,13 +26,16 @@ const resolveSteamId = (input: string): string => {
 
 const DOTA_MATCH_ID_REGEX = /^\d{1,20}$/;
 
+// OpenDota часто відповідає повільніше за інші API, тому для нього довший таймаут (фронтенд чекає 15 с)
+const OPENDOTA = { timeout: 12000 };
+
 let heroesCache: { data: any[]; fetchedAt: number } | null = null;
 const HERO_CACHE_TTL = 1000 * 60 * 60 * 24; // 24 години
 
 // Довідник героїв змінюється рідко, тому кешується на добу
 const refreshHeroesCache = async () => {
     if (heroesCache && Date.now() - heroesCache.fetchedAt < HERO_CACHE_TTL) return;
-    const heroesRes = await http.get('https://api.opendota.com/api/heroStats');
+    const heroesRes = await http.get('https://api.opendota.com/api/heroStats', OPENDOTA);
     heroesCache = { data: heroesRes.data, fetchedAt: Date.now() };
 };
 
@@ -44,13 +47,13 @@ export const getDotaStats = async (steamId: string, mode: string = 'all'): Promi
         // Профіль і W/L обов'язкові; решта секцій — додаткові: OpenDota часто відповідає повільно
         // або з 500, і тоді краще показати профіль без них, ніж помилку на всю сторінку
         const [playerRes, wlRes, optional] = await Promise.all([
-            http.get(playerUrl),
-            http.get(`${playerUrl}/wl`),
+            http.get(playerUrl, OPENDOTA),
+            http.get(`${playerUrl}/wl`, OPENDOTA),
             Promise.allSettled([
-                http.get(`${playerUrl}/recentMatches`),
-                http.get(`${playerUrl}/heroes`),
-                http.get(`${playerUrl}/totals`),
-                http.get(`${playerUrl}/peers`),
+                http.get(`${playerUrl}/recentMatches`, OPENDOTA),
+                http.get(`${playerUrl}/heroes`, OPENDOTA),
+                http.get(`${playerUrl}/totals`, OPENDOTA),
+                http.get(`${playerUrl}/peers`, OPENDOTA),
                 refreshHeroesCache(),
             ]),
         ]);
@@ -235,7 +238,7 @@ export const getDotaMatchDetails = async (matchId: string): Promise<any> => {
         await refreshHeroesCache().catch(() => undefined);
 
         // 2. Отримуємо сирі деталі матчу
-        const res = await http.get(`https://api.opendota.com/api/matches/${matchId}`);
+        const res = await http.get(`https://api.opendota.com/api/matches/${matchId}`, OPENDOTA);
         const matchData = res.data;
 
         // 3. Додаємо кожному гравцю нормальне посилання на картинку

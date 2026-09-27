@@ -1,0 +1,141 @@
+.match-list {
+    --match-accent: #ff4655;
+    --match-loss: #ff4655;
+
+    &--dota { --match-accent: #d94b38; --match-loss: #d94b38; }
+    &--cs2 { --match-accent: #ffa500; --match-loss: #ff4655; }
+
+    grid-column: 1 / -1;
+    min-width: 0;
+    background: rgba(26, 26, 36, 0.4);
+    padding: 24px;
+    border-radius: 24px;
+    border: 1px solid var(--glass-border);
+
+    &__head {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    &__title {
+        font-size: 16px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: #fff;
+    }
+
+    &__hint {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-muted);
+    }
+
+    &__rows {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+}
+
+.match-row {
+    display: grid;
+    grid-template-columns: 88px minmax(0, 1fr) auto auto 20px;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    padding: 14px 20px;
+    border-radius: 16px;
+    border: 1px solid transparent;
+    background: rgba(0, 0, 0, 0.3);
+    color: #fff;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+
+    &:hover:not(:disabled) {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.1);
+        transform: translateX(4px);
+
+        .match-row__arrow { color: var(--match-accent); transform: translateX(3px); }
+    }
+
+    &:focus-visible {
+        outline: 3px solid var(--match-accent);
+        outline-offset: 2px;
+    }
+
+    &:disabled { cursor: default; }
+
+    &__result {
+        font-weight: 900;
+        font-size: 14px;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+
+        &.is-win { color: #2ecc71; }
+        &.is-loss { color: var(--match-loss); }
+    }
+
+    &__primary {
+        font-weight: 800;
+        font-size: 16px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    &__secondary {
+        color: var(--text-muted);
+        font-size: 14px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    &__trailing {
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    &__arrow {
+        color: var(--text-muted);
+        font-size: 18px;
+        transition: transform 0.2s ease, color 0.2s ease;
+    }
+}
+
+@media (max-width: 640px) {
+    .match-list {
+        padding: 18px;
+
+        &__head { flex-direction: column; gap: 4px; }
+    }
+
+    // На телефоні: результат і головне значення зверху, деталі — рядком нижче
+    .match-row {
+        grid-template-columns: 76px minmax(0, 1fr) 16px;
+        grid-template-areas:
+            "result primary arrow"
+            "result details arrow";
+        column-gap: 12px;
+        row-gap: 2px;
+        padding: 12px 14px;
+
+        &__result { grid-area: result; font-size: 13px; }
+        &__primary { grid-area: primary; font-size: 15px; }
+        &__arrow { grid-area: arrow; }
+
+        &__secondary,
+        &__trailing {
+            grid-area: details;
+            font-size: 13px;
+        }
+
+        // Якщо є обидва, trailing стає праворуч від secondary
+        &__secondary + &__trailing { justify-self: end; }
+    }
+}

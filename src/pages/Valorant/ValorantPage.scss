@@ -164,6 +164,12 @@
         margin-top: 24px; padding: 16px 24px; border-radius: 16px; font-weight: 700;
         &--val { background: rgba(255, 70, 85, 0.1); color: #ff4655; border: 1px solid rgba(255, 70, 85, 0.3); }
     }
+
+    &__hint {
+        margin-top: 20px; font-size: 14px; color: var(--text-muted); line-height: 1.5;
+        animation: fadeIn 0.5s ease-out 0.15s both;
+        strong { color: #fff; font-weight: 800; }
+    }
 }
 
 @media (max-width: 720px) {

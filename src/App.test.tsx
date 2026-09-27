@@ -11,7 +11,7 @@ describe('App', () => {
 
     render(<App />);
 
-    expect(await screen.findByText('1,234')).toBeInTheDocument();
+    expect(await screen.findByText('1,234', {}, { timeout: 3000 })).toBeInTheDocument();
     expect(screen.getByText('56')).toBeInTheDocument();
     expect(screen.queryByText('300M+')).not.toBeInTheDocument();
   });

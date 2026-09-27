@@ -91,9 +91,10 @@
 
   /* 🔥 ФІКС ПРОБІЛІВ МІЖ КАРТКАМИ (align-content: start) 🔥 */
   &__bento { 
-    flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); 
+    flex: 1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); 
     grid-auto-rows: minmax(110px, auto); gap: 16px; 
-    align-content: start; 
+    align-content: start;
+    > * { min-width: 0; } 
   }
 
   &__warning {
@@ -136,13 +137,6 @@
   &__heroes { display: flex; gap: 12px; }
 
   &__maps-bento,
-  &__matches-list-bento {
-    grid-column: span 3;
-    background: rgba(26, 26, 36, 0.4);
-    padding: 24px;
-    border-radius: 24px;
-    border: 1px solid var(--glass-border);
-  }
 
   &__section-head {
     display: flex;
@@ -173,11 +167,6 @@
     gap: 10px;
   }
 
-  &__matches-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
 
   &__empty {
     width: 100%;
@@ -247,78 +236,6 @@
   }
 }
 
-.val-match {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 18px;
-  width: 100%;
-  padding: 16px 20px;
-  color: inherit;
-  font: inherit;
-  text-align: left;
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 16px;
-  cursor: pointer;
-  border: 1px solid transparent;
-  transition: 0.2s ease;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.1);
-    transform: translateX(3px);
-  }
-
-  &__main {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    min-width: 0;
-  }
-
-  &__result {
-    width: 80px;
-    font-size: 12px;
-    font-weight: 900;
-    letter-spacing: 0.5px;
-
-    &.is-win {
-      color: #2ecc71;
-    }
-
-    &.is-loss {
-      color: #ff4655;
-    }
-  }
-
-  &__map {
-    color: #fff;
-    font-size: 18px;
-    font-weight: 900;
-    white-space: nowrap;
-  }
-
-  &__agent {
-    color: var(--text-muted);
-    font-size: 14px;
-    font-weight: 700;
-    white-space: nowrap;
-  }
-
-  &__kda {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    color: #fff;
-    font-weight: 800;
-    white-space: nowrap;
-
-    span:last-child {
-      color: var(--text-muted);
-      font-size: 18px;
-    }
-  }
-}
 
 .val-stat {
   background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 24px; padding: 24px; display: flex; flex-direction: column; justify-content: center; transition: 0.3s;
@@ -352,10 +269,6 @@
   &--tracker { background: rgba(255, 70, 85, 0.1); color: #ffb3b8; border-color: rgba(255, 70, 85, 0.3); &:hover { background: rgba(255, 70, 85, 0.2); box-shadow: var(--glow-val); color: #fff; transform: translateY(-2px); } }
 }
 
-.val-card__matches-list-bento button:focus-visible {
-  outline: 3px solid rgba(255, 70, 85, 0.45);
-  outline-offset: 3px;
-}
 
 @media (max-width: 980px) {
   .val-card {
@@ -370,11 +283,10 @@
       padding-bottom: 28px;
     }
 
-	    &__bento { grid-template-columns: repeat(2, 1fr); }
+	    &__bento { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 	    &__chart-bento,
 	    &__heroes-bento,
       &__maps-bento,
-      &__matches-list-bento,
       &__warning { grid-column: span 2; }
 
       &__maps-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -386,30 +298,15 @@
     padding: 20px;
     border-radius: 24px;
 
-	    &__bento { grid-template-columns: 1fr; }
-	    &__chart-bento,
-	    &__heroes-bento,
-      &__maps-bento,
-      &__matches-list-bento,
-      &__warning { grid-column: span 1; }
-	    &__heroes { flex-direction: column; }
-      &__maps-grid { grid-template-columns: 1fr; }
-      &__section-head { align-items: flex-start; flex-direction: column; span { text-align: left; } }
-      &__warning { align-items: flex-start; flex-direction: column; span { text-align: left; } }
-	  }
+    &__bento { grid-template-columns: minmax(0, 1fr); }
 
-  .val-stat,
-  .val-stat--main,
-  .val-stat--wide { grid-column: auto; grid-row: auto; }
+    // Одна колонка: будь-яка плашка на всю ширину, незалежно від span у ширших брейкпоінтах
+    .val-card__bento > * { grid-column: 1 / -1; grid-row: auto; }
 
-  .val-match {
-    align-items: flex-start;
-    flex-direction: column;
-
-    &__main {
-      align-items: flex-start;
-      flex-direction: column;
-      gap: 6px;
-    }
+    &__heroes { flex-direction: column; }
+    &__maps-grid { grid-template-columns: minmax(0, 1fr); }
+    &__section-head { align-items: flex-start; flex-direction: column; span { text-align: left; } }
+    &__warning { align-items: flex-start; flex-direction: column; span { text-align: left; } }
   }
 }
+

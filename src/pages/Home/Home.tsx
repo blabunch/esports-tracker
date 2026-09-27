@@ -4,12 +4,15 @@ import { useQuery } from '@tanstack/react-query';
 import { gameApi } from '../../api/client';
 import { User } from '../../api/types';
 import { cs2Path, dotaPath, valorantPath } from '../../routes';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
+import { useCountUp } from '../../hooks/useCountUp';
 import './Home.scss';
 
 const formatCount = (value?: number) => (value === undefined ? '—' : new Intl.NumberFormat('en-US').format(value));
 
 export const Home: React.FC<{ user?: User | null }> = ({ user }) => {
     const navigate = useNavigate();
+    useDocumentTitle();
 
     // Нікнейм Dota береться з профілю Steam, бо в акаунті зберігається лише числовий ID
     const { data: dotaData, isFetching: isDotaFetching } = useQuery({
@@ -24,6 +27,8 @@ export const Home: React.FC<{ user?: User | null }> = ({ user }) => {
         queryKey: ['overview'],
         queryFn: gameApi.getOverview,
     });
+    const playersTracked = useCountUp(overview?.playersTracked);
+    const profilesChecked = useCountUp(overview?.profilesChecked24h);
 
     const hasLinkedAccounts = user && (user.valName || user.dotaId || user.faceitNickname);
 
@@ -48,11 +53,11 @@ export const Home: React.FC<{ user?: User | null }> = ({ user }) => {
 
                     <div className="home__stats">
                         <div className="stat-box">
-                            <h4>{formatCount(overview?.playersTracked)}</h4>
+                            <h4>{formatCount(playersTracked)}</h4>
                             <p>Players Tracked</p>
                         </div>
                         <div className="stat-box">
-                            <h4>{formatCount(overview?.profilesChecked24h)}</h4>
+                            <h4>{formatCount(profilesChecked)}</h4>
                             <p>Profiles Checked (24h)</p>
                         </div>
                     </div>

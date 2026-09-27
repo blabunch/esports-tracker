@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import { gameApi } from '../../api/client';
 import { SearchHistoryItem, User } from '../../api/types';
 import { historyEntryPath } from '../../routes';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import './HistoryPage.scss';
 
 const formatDate = (dateString: string) =>
@@ -14,6 +15,7 @@ export const HistoryPage: React.FC<{ user?: User | null }> = ({ user }) => {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
     const [confirmClear, setConfirmClear] = useState(false);
+    useDocumentTitle('Search History');
 
     const { data: history = [], isLoading, isError } = useQuery({
         queryKey: ['history'],

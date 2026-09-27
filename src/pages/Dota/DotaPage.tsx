@@ -6,10 +6,12 @@ import { DotaMatchModal } from '../../components/MatchModal/DotaMatchModal';
 import { SkeletonCard } from '../../components/Skeleton/Skeleton';
 import { SearchMemoryPanel } from '../../components/SearchMemoryPanel/SearchMemoryPanel';
 import { ProgressChart } from '../../components/ProgressChart/ProgressChart';
+import { PlayerSuggestions } from '../../components/PlayerSuggestions/PlayerSuggestions';
 import { gameApi } from '../../api/client';
 import { DotaData, User } from '../../api/types';
 import { ProfileShortcut, useProfileShortcuts } from '../../hooks/useProfileShortcuts';
 import { usePlayerStats } from '../../hooks/usePlayerStats';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import { HISTORY_GAME, dotaPath } from '../../routes';
 import './DotaPage.scss';
 
@@ -74,6 +76,8 @@ export const DotaPage: React.FC<{ user?: User | null }> = ({ user }) => {
         history: { game: HISTORY_GAME.dota, query: id, isLoggedIn: canSync },
     });
 
+    useDocumentTitle(data ? `${data.profile.nickname} · Dota 2` : 'Dota 2 Tracker');
+
     const handleShortcutSelect = (shortcut: ProfileShortcut) => {
         if (shortcut.payload.id) navigate(dotaPath(shortcut.payload.id));
     };
@@ -129,6 +133,16 @@ export const DotaPage: React.FC<{ user?: User | null }> = ({ user }) => {
                 )}
 
                 {error && !loading && <div className="search-hero__error search-hero__error--dota" role="alert">{error.message}</div>}
+                {!data && !loading && (
+                    <PlayerSuggestions
+                        accent="dota"
+                        items={[
+                            { label: 'TOPSON', hint: '94054712', path: dotaPath('94054712') },
+                            { label: 'Immortal player', hint: '105248644', path: dotaPath('105248644') },
+                            { label: 'Immortal player', hint: '86745912', path: dotaPath('86745912') },
+                        ]}
+                    />
+                )}
             </div>
 
             {!loading && (

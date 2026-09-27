@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { linkUserAccounts, updateUserProfile } from '../../api/auth';
 import { User } from '../../api/types';
 import { cs2Path, dotaPath, valorantPath } from '../../routes';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import './ProfilePage.scss';
 
 type LinkableGame = 'dota' | 'valorant' | 'cs2';
@@ -21,6 +22,7 @@ export const ProfilePage: React.FC<{ user: User | null; setUser: (user: User) =>
     const [editMode, setEditMode] = useState({ dota: false, valorant: false, cs2: false });
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+    useDocumentTitle('My Dashboard');
 
     if (!user) return <div className="profile-page__guest">Please log in to view your profile.</div>;
 

@@ -1,4 +1,6 @@
 import React from 'react';
+import { MatchList } from '../MatchList/MatchList';
+import { Cs2Data } from '../../api/types';
 import { AreaChart, Area, Tooltip, ResponsiveContainer, XAxis } from 'recharts';
 import './Cs2Card.scss';
 
@@ -31,7 +33,7 @@ const getMapStyle = (name: string, image?: string): React.CSSProperties => {
 };
 
 interface Cs2CardProps { 
-  data: any; 
+  data: Cs2Data; 
   onMatchClick?: (matchId: string) => void; 
 }
 
@@ -163,35 +165,11 @@ export const Cs2Card: React.FC<Cs2CardProps> = ({ data, onMatchClick }) => {
 
         {/* 🔥 ІСТОРІЯ МАТЧІВ CS2 */}
         {data.matches && data.matches.length > 0 && (
-          <div className="cs2-card__matches-list-bento" style={{ gridColumn: '1 / -1', background: 'rgba(26, 26, 36, 0.4)', padding: '24px', borderRadius: '24px', border: '1px solid var(--glass-border)' }}>
-            <h3 className="cs2-stat__label" style={{ marginBottom: '16px', fontSize: '16px', color: '#fff' }}>Recent Matches (Click for scoreboard)</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {data.matches.slice(0, 5).map((m: any, idx: number) => (
-                <button 
-                  key={idx} 
-                  type="button"
-                  onClick={() => onMatchClick && m.id && onMatchClick(m.id)}
-                  style={{ 
-                      display: 'flex', justifyContent: 'space-between', padding: '16px 20px', 
-                      color: 'inherit', font: 'inherit', textAlign: 'left',
-                      background: 'rgba(0,0,0,0.3)', borderRadius: '16px', cursor: 'pointer', 
-                      border: '1px solid transparent', transition: '0.2s' 
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(0,0,0,0.3)'; e.currentTarget.style.borderColor = 'transparent'; }}
-                >
-                  <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-                    <span style={{ fontWeight: 900, color: m.win ? '#2ecc71' : '#ff4655', width: '80px' }}>{m.win ? 'VICTORY' : 'DEFEAT'}</span>
-                    <span style={{ color: '#fff', fontWeight: 800, fontSize: '16px' }}>{m.score}</span>
-                  </div>
-                  <div style={{ color: '#fff', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <span style={{ color: 'var(--text-muted)', fontSize: '14px' }}>{m.date}</span>
-                    <span style={{ color: 'var(--text-muted)', fontSize: '18px' }}>→</span>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
+          <MatchList
+            accent="cs2"
+            onMatchClick={onMatchClick}
+            items={data.matches.slice(0, 5).map(m => ({ id: m.id, win: m.win, primary: m.score, secondary: m.date }))}
+          />
         )}
 
       </div>
