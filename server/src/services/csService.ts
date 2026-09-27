@@ -86,6 +86,7 @@ export const getFaceitStats = async (rawNickname: string, game: string = 'cs2'):
 
         return {
             profile: {
+                playerId: playerRes.data.player_id,
                 nickname: playerRes.data.nickname,
                 avatar: playerRes.data.avatar || 'https://corporate.faceit.com/wp-content/uploads/2021/02/FACEIT-Logo-white.png',
                 country: playerRes.data.country,

@@ -29,6 +29,10 @@ class MemoryCache {
 
         return item.data;
     }
+
+    clear() {
+        this.cache.clear();
+    }
 }
 
 export const apiCache = new MemoryCache();

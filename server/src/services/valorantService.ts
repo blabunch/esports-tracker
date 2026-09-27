@@ -316,6 +316,7 @@ export const getValorantStats = async (
         rank: mmr?.currenttierpatched || "Unranked",
         rank_img: mmr?.images?.small || "",
         elo: mmr?.ranking_in_tier || 0,
+        mmr: typeof mmr?.elo === "number" ? mmr.elo : null,
         peakRank: mmr?.highest_tier_patched || "Unknown",
         totalGames: totalMatches,
         totalWinRate: safePercent(wins, totalMatches),

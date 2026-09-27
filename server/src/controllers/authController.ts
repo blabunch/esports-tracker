@@ -29,6 +29,9 @@ const MAX_EMAIL_LENGTH = 254;
 const MIN_PASSWORD_LENGTH = 8;
 const MAX_PASSWORD_LENGTH = 72; // bcrypt ігнорує все після 72 байт
 
+// Тільки справжні рядки: String(['a@b.co']) інакше перетворив би масив на валідний email
+const readString = (value: unknown) => (typeof value === 'string' ? value : '');
+
 // '' або null — відв'язати акаунт; рядок — прив'язати; інше — невалідне значення
 const normalizeOptionalString = (value: unknown, maxLength: number): string | null | undefined => {
     if (value === undefined) return undefined;
@@ -42,8 +45,8 @@ const normalizeOptionalString = (value: unknown, maxLength: number): string | nu
 
 export const register = async (req: Request, res: Response): Promise<any> => {
     try {
-        const email = String(req.body.email || '').trim().toLowerCase();
-        const password = String(req.body.password || '');
+        const email = readString(req.body?.email).trim().toLowerCase();
+        const password = readString(req.body?.password);
 
         if (!EMAIL_REGEX.test(email) || email.length > MAX_EMAIL_LENGTH) return res.status(400).json({ message: 'Invalid email format' });
         if (password.length < MIN_PASSWORD_LENGTH) return res.status(400).json({ message: `Password must be at least ${MIN_PASSWORD_LENGTH} characters` });
@@ -70,8 +73,8 @@ export const register = async (req: Request, res: Response): Promise<any> => {
 
 export const login = async (req: Request, res: Response): Promise<any> => {
     try {
-        const email = String(req.body.email || '').trim().toLowerCase();
-        const password = String(req.body.password || '');
+        const email = readString(req.body?.email).trim().toLowerCase();
+        const password = readString(req.body?.password);
         if (!email || !password || email.length > MAX_EMAIL_LENGTH) return res.status(400).json({ message: 'Invalid credentials' });
 
         const user = await prisma.user.findUnique({ where: { email } });

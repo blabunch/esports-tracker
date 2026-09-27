@@ -36,6 +36,21 @@ model FavoriteProfile {
   @@unique([userId, shortcutId])
 }
 
+// Один знімок статистики гравця на день — з них будується графік прогресу
+model PlayerSnapshot {
+  id          Int      @id @default(autoincrement())
+  game        String
+  playerKey   String
+  displayName String
+  day         DateTime @db.Date
+  metrics     Json
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([game, playerKey, day])
+  @@index([updatedAt])
+}
+
 model User {
   id             Int      @id @default(autoincrement())
   email          String   @unique
