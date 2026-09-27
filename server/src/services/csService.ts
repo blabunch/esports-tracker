@@ -1,7 +1,8 @@
 import { http } from '../utils/http';
+import { readApiKey } from '../config/env';
 import { HttpError, toUpstreamError } from '../utils/httpError';
 
-const FACEIT_API_KEY = process.env.FACEIT_API_KEY;
+const FACEIT_API_KEY = readApiKey('FACEIT_API_KEY');
 const FACEIT_MATCH_ID_REGEX = /^[\w-]{1,64}$/;
 
 const resolveFaceitNickname = (input: string): string => {

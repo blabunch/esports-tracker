@@ -1,7 +1,8 @@
 import { http } from "../utils/http";
+import { readApiKey } from "../config/env";
 import { HttpError, toUpstreamError } from "../utils/httpError";
 
-const HENRIKDEV_API_KEY = process.env.HENRIKDEV_API_KEY;
+const HENRIKDEV_API_KEY = readApiKey("HENRIKDEV_API_KEY");
 const VALORANT_MATCH_LIMIT = 10;
 const MAP_IMAGES_TTL = 1000 * 60 * 60 * 24; // 24 години
 

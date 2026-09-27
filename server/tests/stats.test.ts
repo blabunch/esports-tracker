@@ -121,6 +121,17 @@ describe('CS2 stats', () => {
         expect(JSON.stringify(res.body)).not.toContain('internal upstream details');
     });
 
+    it('reports a rejected API key as service unavailable, not as a missing player', async () => {
+        vi.spyOn(http, 'get').mockRejectedValue(upstreamError(401));
+        const log = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+        const res = await api().get('/api/cs2/ZywOo');
+
+        expect(res.status).toBe(503);
+        expect(res.body.message).not.toMatch(/not found/i);
+        expect(log.mock.calls.flat().join(' ')).toContain('check the API key');
+    });
+
     it('turns unexpected upstream failures into 502', async () => {
         vi.spyOn(http, 'get').mockRejectedValue(upstreamError(500));
 

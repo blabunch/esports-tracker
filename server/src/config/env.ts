@@ -14,6 +14,12 @@ export const getRequiredEnv = (name: string): string => {
     return value;
 };
 
+// Ключі зовнішніх API часто копіюють із .env разом із лапками чи пробілом у кінці — прибираємо їх
+export const readApiKey = (name: string): string | undefined => {
+    const value = process.env[name]?.trim().replace(/^(["'])(.*)\1$/, '$2').trim();
+    return value || undefined;
+};
+
 export const JWT_SECRET = (() => {
     const secret = getRequiredEnv('JWT_SECRET');
 
