@@ -1,46 +1,52 @@
-# Getting Started with Create React App
+# Esports Tracker
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+React + Express tracker for Valorant, Dota 2 and CS2 stats.
 
-## Available Scripts
+## Local Setup
 
-In the project directory, you can run:
+1. Install frontend dependencies in the project root:
+   `npm install`
+2. Install backend dependencies:
+   `cd server && npm install`
+3. Copy environment templates:
+   `cp .env.example .env.local`
+   `cp server/.env.example server/.env`
+4. Fill backend secrets in `server/.env`.
+5. Run database migrations:
+   `cd server && npx prisma migrate deploy`
+6. Start backend:
+   `cd server && npm run dev`
+7. Start frontend:
+   `npm start`
 
-### `npm start`
+## Deploy Notes
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+Frontend needs `REACT_APP_API_URL`, for example:
+`https://your-api.example.com/api`
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+Backend needs:
 
-### `npm test`
+- `DATABASE_URL`
+- `FRONTEND_URL`
+- `JWT_SECRET` with at least 32 random characters
+- `FACEIT_API_KEY`
+- `HENRIKDEV_API_KEY`
+- optional `DOTA_API_KEY` and `STRATZ_API_KEY`
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- optional `TRUST_PROXY_HOPS` — number of reverse proxies in front of the server (default `1`)
 
-### `npm run build`
+`FRONTEND_URL` may contain several comma-separated origins. Requests from other origins are rejected by CORS.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+For backend deployment, run migrations before starting the server:
+`npm install && npm run build && npm run prisma:deploy && npm start`
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Healthcheck endpoint: `GET /api/health`
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+The frontend is a single-page app: configure your static host to rewrite all unknown paths to `/index.html`, otherwise refreshing `/valorant`, `/profile` etc. returns 404.
 
-### `npm run eject`
+## Verification
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+- Frontend build: `npm run build`
+- Frontend tests: `npm test -- --watchAll=false`
+- Backend typecheck: `cd server && npm test`
+- Prisma schema validation: `cd server && npx prisma validate`

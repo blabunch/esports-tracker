@@ -1,0 +1,92 @@
+.history-page {
+    max-width: 1200px; margin: 0 auto; padding: 60px 40px; width: 100%;
+
+    &__loading { color: #fff; text-align: center; font-size: 24px; font-weight: 800; margin-top: 100px; }
+    
+    &__header { 
+        display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 48px; 
+    }
+    &__title-group { text-align: left; }
+    &__title { font-size: 48px; font-weight: 900; letter-spacing: -1px; color: #fff; margin-bottom: 8px; }
+    &__subtitle { color: var(--text-muted); font-size: 18px; margin: 0; }
+
+    &__clear-btn {
+        display: flex; align-items: center; gap: 8px;
+        background: rgba(255, 70, 85, 0.1); border: 1px solid rgba(255, 70, 85, 0.3);
+        color: #ff4655; padding: 12px 24px; border-radius: 12px; font-weight: 800; font-size: 14px;
+        cursor: pointer; transition: 0.3s; font-family: 'Outfit', sans-serif;
+        svg { width: 18px; height: 18px; }
+        &:hover { background: rgba(255, 70, 85, 0.2); transform: translateY(-2px); border-color: #ff4655; }
+    }
+
+    &__error { 
+        background: rgba(255, 70, 85, 0.1); color: #ff4655; border: 1px solid rgba(255, 70, 85, 0.3);
+        padding: 16px 24px; border-radius: 16px; font-weight: 700; text-align: center; margin-bottom: 32px;
+    }
+
+    &__empty {
+        text-align: center; margin-top: 80px;
+        p { color: #fff; font-size: 24px; font-weight: 800; margin-bottom: 8px; }
+        span { color: var(--text-muted); font-size: 16px; }
+    }
+}
+
+.history-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px;
+}
+
+.history-card {
+    background: rgba(26, 26, 36, 0.4); backdrop-filter: blur(24px); border: 1px solid var(--glass-border);
+    border-radius: 20px; padding: 24px; display: flex; flex-direction: column; cursor: pointer; transition: 0.3s ease;
+    color: inherit; font: inherit; text-align: left;
+    
+    /* Фірмові кольори для ігор */
+    &--valorant { border-top: 4px solid #ff4655; }
+    &--dota2, &--dota { border-top: 4px solid #d94b38; }
+    &--cs2, &--faceit { border-top: 4px solid #ffa500; }
+
+    /* Ефекти наведення */
+    &:hover { background: rgba(255,255,255,0.05); transform: translateY(-4px); }
+    &:focus-visible { outline: 3px solid rgba(255,255,255,0.4); outline-offset: 4px; }
+    &--valorant:hover { box-shadow: 0 15px 30px rgba(255, 70, 85, 0.15); border-color: rgba(255, 70, 85, 0.3); }
+    &--dota2:hover, &--dota:hover { box-shadow: 0 15px 30px rgba(217, 75, 56, 0.15); border-color: rgba(217, 75, 56, 0.3); }
+    &--cs2:hover, &--faceit:hover { box-shadow: 0 15px 30px rgba(255, 165, 0, 0.15); border-color: rgba(255, 165, 0, 0.3); }
+
+    &__top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    
+    &__game { 
+        font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #fff;
+        background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 8px;
+    }
+    
+    &__date { color: var(--text-muted); font-size: 13px; font-weight: 500; }
+
+    &__query { font-size: 24px; font-weight: 800; color: #fff; margin-bottom: 24px; word-break: break-all; }
+
+    &__action {
+        display: flex; justify-content: space-between; align-items: center; margin-top: auto;
+        color: var(--text-muted); font-size: 14px; font-weight: 600; transition: 0.3s;
+        svg { width: 18px; height: 18px; transition: 0.3s; }
+    }
+
+    /* Анімація стрілочки при наведенні на картку */
+    &:hover &__action {
+        color: #fff;
+        svg { transform: translateX(4px); }
+    }
+}
+
+@media (max-width: 720px) {
+    .history-page {
+        padding: 36px 18px;
+
+        &__header {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 20px;
+        }
+
+        &__title { font-size: 36px; }
+        &__clear-btn { justify-content: center; }
+    }
+}

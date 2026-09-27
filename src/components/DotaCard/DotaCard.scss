@@ -1,0 +1,151 @@
+.dota-card {
+  display: flex; gap: 40px;
+  background: rgba(26, 26, 36, 0.4); backdrop-filter: blur(24px);
+  border-radius: 32px; padding: 40px; max-width: 1050px; width: 100%;
+  border: 1px solid var(--glass-border); box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+
+  &__profile {
+    flex: 0 0 280px;
+    border-right: 1px solid var(--glass-border); padding-right: 40px;
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+  }
+
+  &__avatar-box { position: relative; margin-bottom: 20px; }
+  &__avatar { width: 140px; height: 140px; border-radius: 28px; border: 2px solid var(--color-dota); box-shadow: var(--glow-dota); object-fit: cover;}
+  &__name { font-size: 32px; font-weight: 900; margin-bottom: 20px; letter-spacing: -1px; }
+
+  /* РАНГ БЛОК */
+  &__rank-box {
+    display: flex; align-items: center; gap: 16px; width: 100%;
+    background: var(--glass-bg); border: 1px solid var(--glass-border);
+    padding: 12px 20px; border-radius: 16px; margin-bottom: 24px;
+  }
+  &__rank-img { width: 48px; height: 48px; object-fit: contain; filter: drop-shadow(0 0 8px rgba(217, 75, 56, 0.5)); }
+  &__rank-text { text-align: left; }
+  &__rank-name { font-weight: 800; font-size: 18px; color: #fff; }
+  &__rank-sub { color: var(--color-dota); font-size: 14px; font-weight: 700; }
+
+  &__matches-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 32px; width: 100%; }
+
+  /* СПИСОК ТІМЕЙТІВ */
+  &__allies { width: 100%; margin-bottom: 32px; text-align: left; }
+  &__allies-title { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 12px; }
+  &__allies-list { display: flex; flex-direction: column; gap: 10px; }
+  &__ally {
+    display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 12px; transition: 0.3s;
+    &:hover { background: rgba(255,255,255,0.06); transform: translateX(5px); }
+    img { width: 36px; height: 36px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); }
+  }
+  &__ally-info { display: flex; flex-direction: column; }
+  &__ally-name { font-weight: 800; font-size: 13px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px; }
+  &__ally-stat { font-size: 11px; color: var(--color-dota); font-weight: 600; }
+
+  /* КНОПКИ (Мульти-посилання) */
+  &__links {
+    display: flex; flex-direction: column; gap: 10px; width: 100%; margin-top: auto;
+  }
+
+  &__bento { 
+    flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); 
+    grid-auto-rows: minmax(110px, auto); gap: 16px; 
+    align-content: start; /* 🔥 ОСЬ МАГІЯ ДЛЯ ФІКСУ ДІРОК */
+  }
+
+  /* 🔥 БЛОК ГРАФІКА (Повернули на місце!) */
+  &__chart-bento { 
+    grid-column: span 3; 
+    background: var(--glass-bg); 
+    border: 1px solid var(--glass-border); 
+    border-radius: 24px; 
+    display: flex; 
+    flex-direction: column; 
+    overflow: hidden; 
+    min-height: 220px; 
+  }
+  &__chart-header { 
+    padding: 20px 24px 10px 24px; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+  }
+  &__chart-wrapper { 
+    flex: 1;
+    width: 100%; 
+    min-height: 140px; 
+  }
+
+  /* ГЕРОЇ ЗНИЗУ НА ВСЮ ШИРИНУ */
+  &__heroes-bento { grid-column: span 3; background: var(--glass-bg); padding: 24px; border-radius: 24px; border: 1px solid var(--glass-border); display: flex; flex-direction: column; justify-content: center;}
+  &__heroes { display: flex; gap: 12px; }
+}
+
+/* СТИЛІ ОКРЕМИХ ЕЛЕМЕНТІВ */
+.dota-stat {
+  background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 24px; padding: 24px; display: flex; flex-direction: column; justify-content: center; transition: 0.3s;
+  &:hover { background: var(--glass-hover); transform: translateY(-4px); border-color: rgba(217, 75, 56, 0.3); }
+  &--main { grid-row: span 2; background: rgba(217, 75, 56, 0.05); border-color: rgba(217, 75, 56, 0.2); }
+  &--wide { grid-column: span 2; }
+  &__label { font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; letter-spacing: 1px; }
+  &__val { font-size: 32px; font-weight: 900; color: #fff; letter-spacing: -1px; }
+  &__subtext { font-size: 13px; color: var(--text-muted); margin-top: 8px; font-weight: 500; }
+  
+  &--signature { flex-direction: row; align-items: center; justify-content: space-between; background: linear-gradient(135deg, rgba(217, 75, 56, 0.1) 0%, rgba(26, 26, 36, 0.4) 100%); border-color: rgba(217, 75, 56, 0.3); overflow: hidden; }
+  &__sig-info { display: flex; flex-direction: column; z-index: 2; }
+  &__sig-img { height: 80px; border-radius: 12px; border: 2px solid rgba(217, 75, 56, 0.5); box-shadow: var(--glow-dota); transform: perspective(100px) rotateY(-5deg); transition: 0.3s ease; }
+  
+  &--signature:hover .dota-stat__sig-img { transform: perspective(100px) rotateY(0deg) scale(1.05); }
+}
+
+.dota-box { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: 900; font-size: 13px; &--w { background: rgba(46, 204, 113, 0.15); color: #2ecc71; border: 1px solid rgba(46, 204, 113, 0.3); } &--l { background: rgba(217, 75, 56, 0.15); color: #d94b38; border: 1px solid rgba(217, 75, 56, 0.3); } }
+
+.dota-hero { flex: 1; display: flex; flex-direction: column; align-items: center; background: rgba(255,255,255,0.02); padding: 12px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); overflow: hidden; text-align: center; img { width: 100%; height: 48px; object-fit: cover; border-radius: 10px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.1);} &__placeholder { width: 100%; height: 48px; border-radius: 10px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; font-weight: bold; color: var(--text-muted); margin-bottom: 10px; } &__name { font-size: 13px; font-weight: 800; color: #fff; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; } &__games { font-size: 12px; font-weight: 500; color: var(--text-muted); } }
+
+.dota-link {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; padding: 12px; border-radius: 12px; font-weight: 700; font-size: 14px; text-decoration: none; transition: 0.3s; border: 1px solid var(--glass-border);
+  
+  &--steam { background: rgba(255,255,255,0.05); color: #fff; &:hover { background: rgba(255,255,255,0.1); } }
+  &--buff { background: rgba(217, 75, 56, 0.1); color: #ff8272; border-color: rgba(217, 75, 56, 0.3); &:hover { background: rgba(217, 75, 56, 0.2); box-shadow: var(--glow-dota); } }
+  &--open { background: rgba(52, 152, 219, 0.1); color: #6dbcf0; border-color: rgba(52, 152, 219, 0.3); &:hover { background: rgba(52, 152, 219, 0.2); box-shadow: 0 0 15px rgba(52, 152, 219, 0.3); } }
+}
+
+.dota-card__matches-list-bento button:focus-visible {
+  outline: 3px solid rgba(217, 75, 56, 0.45);
+  outline-offset: 3px;
+}
+
+@media (max-width: 980px) {
+  .dota-card {
+    flex-direction: column;
+    padding: 28px;
+
+    &__profile {
+      flex: none;
+      border-right: 0;
+      border-bottom: 1px solid var(--glass-border);
+      padding-right: 0;
+      padding-bottom: 28px;
+    }
+
+    &__bento { grid-template-columns: repeat(2, 1fr); }
+    &__chart-bento,
+    &__heroes-bento { grid-column: span 2; }
+  }
+}
+
+@media (max-width: 640px) {
+  .dota-card {
+    padding: 20px;
+    border-radius: 24px;
+
+    &__bento { grid-template-columns: 1fr; }
+    &__chart-bento,
+    &__heroes-bento { grid-column: span 1; }
+    &__heroes { flex-direction: column; }
+  }
+
+  .dota-stat,
+  .dota-stat--main,
+  .dota-stat--wide { grid-column: auto; grid-row: auto; }
+}

@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model SearchHistory {
+  id        Int      @id @default(autoincrement())
+  game      String
+  query     String
+  mode      String?
+  createdAt DateTime @default(now())
+  userId    Int?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@unique([userId, game, query])
+}
+
+model FavoriteProfile {
+  id         Int      @id @default(autoincrement())
+  shortcutId String
+  game       String
+  label      String
+  subtitle   String?
+  payload    Json
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  userId     Int
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, game, updatedAt])
+  @@unique([userId, shortcutId])
+}
+
+model User {
+  id             Int      @id @default(autoincrement())
+  email          String   @unique
+  password       String
+  
+  valName        String?  
+  valTag         String?  
+  dotaId         String?  
+  faceitNickname String?  
+  displayName    String?
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  searchHistory  SearchHistory[]
+  favoriteProfiles FavoriteProfile[]
+}

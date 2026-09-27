@@ -1,0 +1,200 @@
+/* 🔥 АНІМОВАНИЙ БЕКГРАУНД (Microdots + Smooth Shimmer) 🔥 */
+.valorant-page {
+    /* ФІКС БАГА: Тягнемо сторінку вгору під хедер, щоб не було дірки */
+    margin-top: -100px;
+    /* Збільшуємо padding-top: 100px (компенсація хедера) + 60px (оригінальний відступ) */
+    padding: 160px 40px 60px; 
+    
+    display: flex; 
+    flex-direction: column; 
+    align-items: center;
+    position: relative;
+    min-height: 100vh;
+    z-index: 1;
+    background-color: #09090b;
+    overflow: hidden; /* Щоб крапки не вилітали за межі сторінки і не створювали скрол */
+
+    /* ПАТЕРН: Хаотичні літаючі мікродотси (Microdots) */
+    &::before {
+        content: '';
+        position: absolute;
+        top: -50px; left: -50px; right: -50px; bottom: -50px; /* Трохи виходимо за краї для плавності */
+        
+        /* 6 різних шарів крапок різного розміру та яскравості */
+        background-image:
+            radial-gradient(2px 2px at 40px 60px, rgba(255, 70, 85, 0.7), transparent),
+            radial-gradient(2.5px 2.5px at 150px 130px, rgba(255, 70, 85, 0.5), transparent),
+            radial-gradient(1.5px 1.5px at 250px 70px, rgba(255, 70, 85, 0.8), transparent),
+            radial-gradient(3px 3px at 320px 220px, rgba(255, 70, 85, 0.4), transparent),
+            radial-gradient(2px 2px at 80px 280px, rgba(255, 70, 85, 0.9), transparent),
+            radial-gradient(2.5px 2.5px at 200px 350px, rgba(255, 70, 85, 0.6), transparent);
+        
+        /* Кожен шар має свій розмір патерну, щоб уникнути симетрії */
+        background-size: 350px 350px, 400px 400px, 300px 300px, 450px 450px, 380px 380px, 420px 420px;
+        background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0;
+        
+        z-index: -2;
+        pointer-events: none;
+        /* Запускаємо хаотичний рух */
+        animation: chaoticDots 50s linear infinite;
+    }
+
+    /* ЕФЕКТ: Smooth Shimmer (Плавне світіння на фоні) */
+    &::after {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: radial-gradient(circle at 50% 50%, rgba(255, 70, 85, 0.08) 0%, transparent 60%);
+        background-size: 200% 200%;
+        z-index: -1;
+        pointer-events: none;
+        animation: valorantShimmer 15s ease-in-out infinite alternate;
+    }
+}
+
+/* 🔥 АНІМАЦІЯ: Шари крапок рухаються в абсолютно різних напрямках */
+@keyframes chaoticDots {
+    100% {
+        background-position:
+            350px -350px,   /* Рух вгору-вправо */
+            -400px 400px,   /* Рух вниз-вліво */
+            300px 300px,    /* Рух вниз-вправо */
+            -450px -450px,  /* Рух вгору-вліво */
+            380px -380px,   /* Рух вгору-вправо повільно */
+            -420px 420px;   /* Рух вниз-вліво повільно */
+    }
+}
+
+/* Ключові кадри для пульсації світіння */
+@keyframes valorantShimmer {
+    0% { background-position: 0% 0%; opacity: 0.5; }
+    50% { background-position: 100% 100%; transform: scale(1.2); opacity: 1; }
+    100% { background-position: 0% 100%; transform: scale(1); opacity: 0.5; }
+}
+
+.valorant-page .search-hero {
+    text-align: center; margin-bottom: 40px; width: 100%; max-width: 750px;
+
+    &__title { font-size: 56px; font-weight: 900; letter-spacing: -2px; margin-bottom: 12px; }
+    &__highlight--val { color: #ff4655; text-shadow: 0 0 20px rgba(255, 70, 85, 0.4); }
+    &__subtitle { color: var(--text-muted); margin-bottom: 40px; font-size: 18px; }
+
+    &__form { display: flex; gap: 16px; min-height: 68px; margin-bottom: 16px; }
+
+    &__input-wrapper {
+        display: grid; 
+        /* 🔥 Додали місце під іконку (50px на початку) */
+        grid-template-columns: 50px 1fr auto 100px; 
+        align-items: center;
+        gap: 8px;
+        flex: 1; 
+        background: rgba(0,0,0,0.4); 
+        border: 2px solid rgba(255,255,255,0.1);
+        border-radius: 20px; 
+        padding: 0 24px 0 16px; 
+        transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+        box-shadow: inset 0 4px 10px rgba(0,0,0,0.5);
+
+        /* Базовий фокус */
+        &--val:focus-within { border-color: rgba(255, 255, 255, 0.3); }
+
+        /* 🔥 СТАН: ГОТОВО (Все введено правильно) */
+        &.is-ready {
+            border-color: #ff4655;
+            box-shadow: inset 0 4px 10px rgba(0,0,0,0.5), 0 0 20px rgba(255, 70, 85, 0.2);
+            
+            .search-hero__icon { color: #ff4655; filter: drop-shadow(0 0 8px rgba(255, 70, 85, 0.6)); }
+            .search-hero__separator { color: #ff4655; transform: scale(1.1); }
+        }
+
+        /* 🔥 СТАН: ПОМИЛКА (Тег задовгий) */
+        &.is-error {
+            border-color: #ff0000;
+            background: rgba(255, 0, 0, 0.05);
+            animation: inputShake 0.4s ease;
+            
+            .search-hero__icon { color: #ff0000; }
+            .search-hero__separator { color: #ff0000; }
+        }
+    }
+
+    /* 🔥 Іконка всередині інпута */
+    &__icon {
+        display: flex; align-items: center; justify-content: center;
+        color: rgba(255,255,255,0.2); transition: 0.3s;
+        svg { width: 24px; height: 24px; }
+    }
+
+    &__separator { color: var(--text-muted); font-size: 20px; font-weight: 800; transition: 0.3s; }
+
+    &__input {
+        width: 100%; 
+        background: transparent; border: none; color: #fff; font-size: 18px; font-weight: 600;
+        outline: none; height: 100%; font-family: 'Outfit', sans-serif;
+        &::placeholder { color: rgba(255,255,255,0.2); font-weight: 500; }
+        
+        &--tag { text-align: center; color: #ff4655; font-weight: 800; }
+    }
+
+    &__btn {
+        border: none; padding: 0 48px; border-radius: 20px; font-weight: 900; font-size: 18px;
+        cursor: pointer; transition: 0.3s ease; color: #fff; font-family: 'Outfit', sans-serif;
+
+        &--val {
+            background: #ff4655; box-shadow: 0 10px 25px rgba(255, 70, 85, 0.3);
+            &:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 15px 35px rgba(255, 70, 85, 0.5); }
+        }
+        &:disabled { opacity: 0.5; cursor: not-allowed; transform: none; filter: grayscale(100%); }
+    }
+
+    &__quick-action { margin-top: 16px; }
+
+    &__quick-btn {
+        display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px;
+        border-radius: 16px; font-weight: 800; font-size: 15px; cursor: pointer; transition: 0.3s ease;
+        font-family: 'Outfit', sans-serif;
+
+        &--val {
+            background: rgba(255, 70, 85, 0.1); border: 1px solid rgba(255, 70, 85, 0.3); color: #ffb3b8;
+            &:hover { background: rgba(255, 70, 85, 0.2); transform: translateY(-2px); }
+        }
+    }
+
+    &__error {
+        margin-top: 24px; padding: 16px 24px; border-radius: 16px; font-weight: 700;
+        &--val { background: rgba(255, 70, 85, 0.1); color: #ff4655; border: 1px solid rgba(255, 70, 85, 0.3); }
+    }
+}
+
+@media (max-width: 720px) {
+    .valorant-page {
+        padding: 140px 18px 40px;
+    }
+
+    .valorant-page .search-hero {
+        &__title { font-size: 40px; }
+        &__form { flex-direction: column; height: auto; }
+        &__input-wrapper {
+            grid-template-columns: 36px 1fr auto 78px;
+            min-height: 60px;
+            padding: 0 14px;
+        }
+        &__btn { min-height: 56px; width: 100%; }
+    }
+}
+
+/* 🔥 Анімація трясіння для помилки */
+@keyframes inputShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-8px); }
+    50% { transform: translateX(8px); }
+    75% { transform: translateX(-4px); }
+}
+
+/* SKELETON LOADERS */
+.skeleton-wrapper { width: 100%; max-width: 800px; margin-top: 40px; display: flex; flex-direction: column; gap: 24px; }
+.skeleton { background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite linear; border-radius: 20px; }
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+.skeleton-header { height: 140px; }
+.skeleton-stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; height: 100px; }
+.skeleton-match { height: 80px; border-radius: 16px; }

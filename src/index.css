@@ -1,13 +1,44 @@
-body {
+* {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+body {
+  background-color: #09090b; /* Головний темний фон */
+  color: #fff;
+  font-family: 'Outfit', sans-serif;
+  overflow-x: hidden;
+}
+
+.app-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* 🔥 ГЛОБАЛЬНИЙ ФІКС ХЕДЕРА 🔥 */
+.main-content {
+  flex: 1; 
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  /* Додаємо 100px зверху, щоб компенсувати висоту закріпленого хедера для ВСІХ сторінок */
+  padding-top: 100px; 
+}
+
+/* Анімація появи знизу */
+.fade-in-up {
+  animation: fadeInUp 0.4s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

@@ -1,0 +1,58 @@
+.auth-overlay {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(9, 9, 11, 0.8); backdrop-filter: blur(8px);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000;
+}
+
+.auth-modal {
+    background: rgba(26, 26, 36, 0.6); backdrop-filter: blur(24px);
+    border: 1px solid var(--glass-border); border-radius: 24px;
+    padding: 40px; width: 100%; max-width: 400px;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.5); position: relative;
+    text-align: center;
+
+    &__close {
+        position: absolute; top: 20px; right: 24px;
+        background: transparent; border: none; color: var(--text-muted);
+        font-size: 28px; cursor: pointer; transition: 0.3s;
+        &:hover { color: #fff; transform: scale(1.1); }
+    }
+
+    &__title { font-size: 28px; font-weight: 900; color: #fff; margin-bottom: 8px; }
+    &__subtitle { font-size: 14px; color: var(--text-muted); margin-bottom: 24px; font-weight: 500;}
+
+    &__error { background: rgba(255, 70, 85, 0.1); color: #ff4655; padding: 12px; border-radius: 12px; font-size: 13px; font-weight: 700; margin-bottom: 20px; border: 1px solid rgba(255, 70, 85, 0.3); }
+
+    &__form { display: flex; flex-direction: column; gap: 16px; }
+
+    &__input-group {
+        display: flex; flex-direction: column; text-align: left; gap: 6px;
+        label { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+        input {
+            background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border);
+            padding: 14px 16px; border-radius: 12px; color: #fff; font-size: 15px;
+            font-family: 'Outfit', sans-serif; transition: 0.3s;
+            &:focus { outline: none; border-color: rgba(255, 255, 255, 0.3); box-shadow: 0 0 15px rgba(255, 255, 255, 0.05); }
+            &::placeholder { color: rgba(255,255,255,0.2); }
+        }
+    }
+
+    &__btn {
+        margin-top: 8px; background: #fff; color: #000; border: none;
+        padding: 16px; border-radius: 12px; font-size: 16px; font-weight: 800;
+        cursor: pointer; transition: 0.3s; font-family: 'Outfit', sans-serif;
+        &:hover { background: #e0e0e0; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255,255,255,0.1); }
+        &:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    }
+
+    &__switch {
+        margin-top: 24px; font-size: 14px; color: var(--text-muted); font-weight: 500;
+        button { background: transparent; border: none; color: #fff; font: inherit; font-weight: 700; cursor: pointer; transition: 0.3s; &:hover { text-decoration: underline; } &:focus-visible { outline: 2px solid rgba(255,255,255,0.45); outline-offset: 3px; border-radius: 6px; } }
+    }
+}
+
+@media (max-width: 520px) {
+    .auth-overlay { padding: 18px; }
+    .auth-modal { padding: 32px 22px; }
+}

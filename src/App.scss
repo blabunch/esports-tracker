@@ -1,0 +1,50 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #09090b; /* Головний темний фон */
+  color: #fff;
+  font-family: 'Outfit', sans-serif;
+  overflow-x: hidden;
+}
+
+.app-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* 🔥 ГЛОБАЛЬНИЙ ФІКС ХЕДЕРА 🔥 */
+.main-content {
+  flex: 1; 
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  /* Додаємо 100px зверху, щоб компенсувати висоту закріпленого хедера для ВСІХ сторінок */
+  padding-top: 100px; 
+}
+
+@media (max-width: 820px) {
+  .main-content {
+    padding-top: 138px;
+  }
+}
+
+/* Анімація появи знизу */
+.fade-in-up {
+  animation: fadeInUp 0.4s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

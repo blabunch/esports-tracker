@@ -1,0 +1,118 @@
+.match-modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(8px);
+    display: flex; align-items: center; justify-content: center; z-index: 9999;
+    padding: 24px;
+    animation: fadeIn 0.3s ease;
+}
+
+.match-modal-content {
+    background: #09090b; border: 1px solid rgba(255,255,255,0.1); border-radius: 24px;
+    width: min(1100px, 100%); max-height: 88vh; overflow-y: auto;
+    padding: 32px; position: relative; box-shadow: 0 25px 50px rgba(0,0,0,0.8);
+    
+    &::-webkit-scrollbar { width: 8px; }
+    &::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
+}
+
+.close-btn {
+    position: absolute; top: 24px; right: 24px; background: rgba(255,255,255,0.1); border: none;
+    color: #fff; width: 36px; height: 36px; border-radius: 50%; font-size: 16px; cursor: pointer; transition: 0.2s;
+    &:hover { background: #ff4655; transform: rotate(90deg); }
+}
+
+.match-modal-title {
+    font-size: 28px; font-weight: 900; margin-bottom: 24px; color: #fff;
+    span { color: var(--text-muted); font-weight: 600; font-size: 18px; }
+}
+
+/* 🔥 СТИЛІ КОМАНД 🔥 */
+.team-section {
+    margin-bottom: 24px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 16px;
+    padding: 16px;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+.team-header {
+    font-size: 16px; font-weight: 900; margin-bottom: 12px; padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.1); color: #fff; text-transform: uppercase;
+    display: flex; justify-content: space-between;
+}
+
+.scoreboard { display: flex; flex-direction: column; gap: 8px; }
+
+.scoreboard-header {
+    display: grid; grid-template-columns: 50px 1fr 120px 80px; padding: 0 16px 8px;
+    color: var(--text-muted); font-size: 12px; text-transform: uppercase; font-weight: 800;
+    column-gap: 18px;
+
+    &--dota { grid-template-columns: 64px minmax(180px, 1fr) 130px 120px; }
+    &--cs2 { grid-template-columns: 70px minmax(180px, 1fr) 130px 80px; }
+}
+
+.scoreboard-row {
+    display: grid; grid-template-columns: 50px 1fr 120px 80px; align-items: center;
+    background: rgba(0,0,0,0.3); padding: 12px 16px; border-radius: 12px; transition: 0.2s; border: 1px solid transparent;
+    column-gap: 18px; width: 100%; color: inherit; font: inherit; text-align: left;
+    
+    /* 🔥 КЛІКАБЕЛЬНІСТЬ 🔥 */
+    &.is-clickable {
+        cursor: pointer;
+        &:hover { 
+            background: rgba(255,255,255,0.08); 
+            transform: translateX(4px); 
+            border-color: rgba(255,255,255,0.2); 
+        }
+    }
+
+    &:disabled {
+        cursor: default;
+        opacity: 0.82;
+    }
+
+    &--dota { grid-template-columns: 64px minmax(180px, 1fr) 130px 120px; }
+    &--cs2 { grid-template-columns: 70px minmax(180px, 1fr) 130px 80px; }
+
+    &.team-red, &.team-dire { border-left: 4px solid #ff4655; }
+    &.team-blue { border-left: 4px solid #3498db; }
+    &.team-radiant { border-left: 4px solid #2ecc71; }
+
+    .agent-icon { width: 36px; height: 36px; border-radius: 8px; background: #1a1a24; object-fit: cover; }
+
+    .kill-pill {
+        width: 48px; height: 48px; border-radius: 12px;
+        background: rgba(255, 165, 0, 0.2); color: #ffa500;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 16px; font-weight: 900;
+    }
+
+    .player-info { min-width: 0; display: flex; flex-direction: column; strong { font-size: 15px; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .tag { font-size: 12px; color: var(--text-muted); } }
+    .kda { font-weight: 700; color: #fff; letter-spacing: 1px; font-size: 14px;}
+    .score { font-weight: 900; font-size: 14px; }
+    .score--positive { color: #2ecc71; }
+}
+
+@media (max-width: 720px) {
+    .match-modal-overlay { padding: 12px; align-items: flex-start; }
+    .match-modal-content { padding: 24px 16px; max-height: 94vh; border-radius: 18px; }
+    .match-modal-title { font-size: 22px; padding-right: 44px; }
+    .team-section { padding: 12px; }
+    .scoreboard { gap: 10px; }
+    .scoreboard-header { display: none; }
+    .scoreboard-row,
+    .scoreboard-row--dota,
+    .scoreboard-row--cs2 {
+        grid-template-columns: 48px minmax(0, 1fr);
+        row-gap: 6px;
+        padding: 14px;
+
+        .kda,
+        .score {
+            grid-column: 2;
+        }
+    }
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
