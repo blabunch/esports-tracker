@@ -32,7 +32,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
   public render() {
     if (this.state.hasError) {
-      const showDetails = process.env.NODE_ENV !== 'production';
+      const showDetails = import.meta.env.DEV;
 
       return (
         <div style={{

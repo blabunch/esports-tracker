@@ -3,7 +3,7 @@ import toast from 'react-hot-toast';
 import { ValorantData, DotaData, Cs2Data, SearchHistoryItem, FavoriteProfileItem } from './types';
 
 export const API = axios.create({
-    baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5001/api',
+    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5001/api',
     timeout: 10000,
 });
 
