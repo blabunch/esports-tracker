@@ -1,29 +1,29 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { gameApi } from '../../api/client';
+import { User } from '../../api/types';
+import { cs2Path, dotaPath, valorantPath } from '../../routes';
 import './Home.scss';
 
-export const Home: React.FC<{ user?: any }> = ({ user }) => {
-    const navigate = useNavigate();
-    
-    const [dotaName, setDotaName] = useState<string | null>(null);
-    const [isDotaFetching, setIsDotaFetching] = useState(false);
+const formatCount = (value?: number) => (value === undefined ? '—' : new Intl.NumberFormat('en-US').format(value));
 
-    // 🔥 ІДЕАЛЬНИЙ ПОШУК НІКНЕЙМУ DOTA 2 (Завдяки логам!)
-    useEffect(() => {
-        if (user?.dotaId) {
-            setIsDotaFetching(true);
-            gameApi.getDota(user.dotaId)
-                .then(data => {
-                    const fetchedName = data?.profile?.nickname;
-                    if (fetchedName) {
-                        setDotaName(fetchedName);
-                    }
-                })
-                .catch(err => console.error("Could not fetch Dota name", err))
-                .finally(() => setIsDotaFetching(false));
-        }
-    }, [user?.dotaId]);
+export const Home: React.FC<{ user?: User | null }> = ({ user }) => {
+    const navigate = useNavigate();
+
+    // Нікнейм Dota береться з профілю Steam, бо в акаунті зберігається лише числовий ID
+    const { data: dotaData, isFetching: isDotaFetching } = useQuery({
+        queryKey: ['dota-name', user?.dotaId || ''],
+        queryFn: () => gameApi.getDota(user!.dotaId!),
+        enabled: Boolean(user?.dotaId),
+    });
+    const dotaName = dotaData?.profile?.nickname;
+
+    // Реальна статистика з БД замість вигаданих цифр
+    const { data: overview } = useQuery({
+        queryKey: ['overview'],
+        queryFn: gameApi.getOverview,
+    });
 
     const hasLinkedAccounts = user && (user.valName || user.dotaId || user.faceitNickname);
 
@@ -43,17 +43,17 @@ export const Home: React.FC<{ user?: any }> = ({ user }) => {
                         AND SO MUCH MORE.
                     </h1>
                     <p className="home__subtitle">
-                        Analyze matches, study opponents, and improve in your favorite games with our cutting-edge tracking technology.
+                        Look up any player in Valorant, Dota 2 and CS2, study their recent form and follow how their rating changes over time.
                     </p>
 
                     <div className="home__stats">
                         <div className="stat-box">
-                            <h4>300M+</h4>
+                            <h4>{formatCount(overview?.playersTracked)}</h4>
                             <p>Players Tracked</p>
                         </div>
                         <div className="stat-box">
-                            <h4>25M+</h4>
-                            <p>Matches Past 24 Hrs</p>
+                            <h4>{formatCount(overview?.profilesChecked24h)}</h4>
+                            <p>Profiles Checked (24h)</p>
                         </div>
                     </div>
                 </div>
@@ -76,7 +76,7 @@ export const Home: React.FC<{ user?: any }> = ({ user }) => {
                                 </div>
                                 <div className="widget-badges">
                                     {user.valName && (
-                                        <button className="widget-badge widget-badge--val" onClick={() => navigate('/valorant', { state: { autoSearch: true, name: user.valName, tag: user.valTag } })}>
+                                        <button className="widget-badge widget-badge--val" onClick={() => navigate(valorantPath(user.valName!, user.valTag!))}>
                                             <span className="game-icon">V</span> 
                                             <span className="game-id">{user.valName}#{user.valTag}</span>
                                         </button>
@@ -84,7 +84,7 @@ export const Home: React.FC<{ user?: any }> = ({ user }) => {
                                     
                                     {/* 🔥 ОНОВЛЕНИЙ ВІДЖЕТ DOTA 2 */}
                                     {user.dotaId && (
-                                        <button className="widget-badge widget-badge--dota" onClick={() => navigate('/dota', { state: { autoSearch: true, id: user.dotaId } })}>
+                                        <button className="widget-badge widget-badge--dota" onClick={() => navigate(dotaPath(user.dotaId!))}>
                                             <span className="game-icon">D</span> 
                                             <span className="game-id">
                                                 {isDotaFetching ? 'Fetching...' : (dotaName ? dotaName : user.dotaId)}
@@ -93,7 +93,7 @@ export const Home: React.FC<{ user?: any }> = ({ user }) => {
                                     )}
 
                                     {user.faceitNickname && (
-                                        <button className="widget-badge widget-badge--cs2" onClick={() => navigate('/cs2', { state: { autoSearch: true, nickname: user.faceitNickname } })}>
+                                        <button className="widget-badge widget-badge--cs2" onClick={() => navigate(cs2Path(user.faceitNickname!))}>
                                             <span className="game-icon">C</span> 
                                             <span className="game-id">{user.faceitNickname}</span>
                                         </button>

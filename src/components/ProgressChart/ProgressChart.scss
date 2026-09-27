@@ -1,0 +1,59 @@
+.progress-chart {
+    width: 100%;
+    max-width: 1050px;
+    margin: 24px auto 0;
+    padding: 24px;
+    background: rgba(26, 26, 36, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 24px;
+    backdrop-filter: blur(24px);
+
+    &__header {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    &__title {
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #a1a1aa;
+    }
+
+    &__subtitle {
+        margin-top: 4px;
+        font-size: 13px;
+        color: #71717a;
+    }
+
+    &__value {
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+        font-size: 28px;
+        font-weight: 800;
+    }
+
+    &__delta {
+        font-size: 14px;
+        font-weight: 700;
+
+        &.is-up { color: #22c55e; }
+        &.is-down { color: #ef4444; }
+    }
+
+    &__plot {
+        height: 200px;
+        margin-top: 16px;
+    }
+
+    @media (max-width: 600px) {
+        padding: 16px;
+
+        &__value { font-size: 22px; }
+    }
+}

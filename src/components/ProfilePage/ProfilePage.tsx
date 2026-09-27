@@ -1,87 +1,69 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { linkUserAccounts, updateUserProfile } from '../../api/auth'; // 🔥 ДОДАЛИ ІМПОРТ
+import toast from 'react-hot-toast';
+import { linkUserAccounts, updateUserProfile } from '../../api/auth';
+import { User } from '../../api/types';
+import { cs2Path, dotaPath, valorantPath } from '../../routes';
 import './ProfilePage.scss';
 
-export const ProfilePage: React.FC<{ user: any; setUser: (user: any) => void }> = ({ user, setUser }) => {
-    // 1. ВСІ ХУКИ ОГОЛОШУЮТЬСЯ НА САМОМУ ВЕРХУ
-    const [displayName, setDisplayName] = useState('');
+type LinkableGame = 'dota' | 'valorant' | 'cs2';
+
+// Компонент монтується заново при зміні користувача (key у App), тому початкові значення беремо прямо з user
+export const ProfilePage: React.FC<{ user: User | null; setUser: (user: User) => void }> = ({ user, setUser }) => {
+    const [displayName, setDisplayName] = useState(() => user?.displayName || user?.email.split('@')[0] || '');
     const [nameSaved, setNameSaved] = useState(false);
 
-    const [dotaId, setDotaId] = useState('');
-    const [valName, setValName] = useState('');
-    const [valTag, setValTag] = useState('');
-    const [faceitNickname, setFaceitNickname] = useState('');
-    
+    const [dotaId, setDotaId] = useState(user?.dotaId || '');
+    const [valName, setValName] = useState(user?.valName || '');
+    const [valTag, setValTag] = useState(user?.valTag || '');
+    const [faceitNickname, setFaceitNickname] = useState(user?.faceitNickname || '');
+
     const [editMode, setEditMode] = useState({ dota: false, valorant: false, cs2: false });
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
-    // 2. СИНХРОНІЗАЦІЯ ДАНИХ (Коли user приходить з бекенду після рефрешу)
-    useEffect(() => {
-        if (user) {
-            setDisplayName(user.displayName || user.email?.split('@')[0] || '');
-            setDotaId(user.dotaId || '');
-            setValName(user.valName || '');
-            setValTag(user.valTag || '');
-            setFaceitNickname(user.faceitNickname || '');
-        }
-    }, [user]);
-
-    // 3. РАННІЙ ПОВЕРНЕННЯ (ТІЛЬКИ ПІСЛЯ ВСІХ ХУКІВ!)
     if (!user) return <div className="profile-page__guest">Please log in to view your profile.</div>;
 
+    // Помилки API вже показує interceptor у client.ts через toast
     const handleSaveName = async () => {
         setLoading(true);
-        const token = localStorage.getItem('token');
         try {
-            const response = await updateUserProfile(token!, { displayName });
-            setUser(response.user); // Оновлюємо глобальний стейт
+            const response = await updateUserProfile({ displayName });
+            setUser(response.user);
             setNameSaved(true);
+            toast.success('Nickname saved');
             setTimeout(() => setNameSaved(false), 2000);
-        } catch (error) {
-            alert('Failed to save name.');
+        } catch {
+            // API interceptor already shows a user-facing error toast.
         } finally {
             setLoading(false);
         }
     };
 
-    const handleSaveGame = async (game: string) => {
+    const updateLinks = async (game: LinkableGame, updateData: Record<string, string>, successMessage: string) => {
         setLoading(true);
-        const token = localStorage.getItem('token');
         try {
-            let updateData = {};
-            if (game === 'dota') updateData = { dotaId };
-            if (game === 'valorant') updateData = { valName, valTag };
-            if (game === 'cs2') updateData = { faceitNickname };
-
-            const response = await linkUserAccounts(token!, updateData);
-            setUser(response.user); 
-            setEditMode({ ...editMode, [game]: false });
-        } catch (error) {
-            alert('Failed to link account.');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleUnlink = async (game: string) => {
-        setLoading(true);
-        const token = localStorage.getItem('token');
-        try {
-            let updateData = {};
-            if (game === 'dota') updateData = { dotaId: '' };
-            if (game === 'valorant') updateData = { valName: '', valTag: '' };
-            if (game === 'cs2') updateData = { faceitNickname: '' };
-
-            const response = await linkUserAccounts(token!, updateData);
+            const response = await linkUserAccounts(updateData);
             setUser(response.user);
             setEditMode({ ...editMode, [game]: false });
-        } catch (error) {
-            alert('Failed to unlink account.');
+            toast.success(successMessage);
+        } catch {
+            // API interceptor already shows a user-facing error toast.
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleSaveGame = (game: LinkableGame) => {
+        if (game === 'dota') return updateLinks(game, { dotaId }, 'Dota 2 account linked');
+        if (game === 'valorant') return updateLinks(game, { valName, valTag }, 'Valorant account linked');
+        return updateLinks(game, { faceitNickname }, 'Faceit account linked');
+    };
+
+    const handleUnlink = (game: LinkableGame) => {
+        if (game === 'dota') return updateLinks(game, { dotaId: '' }, 'Dota 2 account unlinked');
+        if (game === 'valorant') return updateLinks(game, { valName: '', valTag: '' }, 'Valorant account unlinked');
+        return updateLinks(game, { faceitNickname: '' }, 'Faceit account unlinked');
     };
 
     return (
@@ -120,7 +102,7 @@ export const ProfilePage: React.FC<{ user: any; setUser: (user: any) => void }> 
                             <p className="name">{user.dotaId}</p>
                         </div>
                         <div className="passport__actions">
-                            <button className="btn-view btn-view--dota" onClick={() => navigate('/dota', { state: { autoSearch: true, id: user.dotaId } })}>View Stats</button>
+                            <button className="btn-view btn-view--dota" onClick={() => navigate(dotaPath(user.dotaId!))}>View Stats</button>
                             <button className="btn-edit" onClick={() => setEditMode({...editMode, dota: true})} title="Settings">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                             </button>
@@ -153,7 +135,7 @@ export const ProfilePage: React.FC<{ user: any; setUser: (user: any) => void }> 
                             <p className="name">{user.valName} <span className="tag">#{user.valTag}</span></p>
                         </div>
                         <div className="passport__actions">
-                            <button className="btn-view btn-view--val" onClick={() => navigate('/valorant', { state: { autoSearch: true, name: user.valName, tag: user.valTag } })}>View Stats</button>
+                            <button className="btn-view btn-view--val" onClick={() => navigate(valorantPath(user.valName!, user.valTag!))}>View Stats</button>
                             <button className="btn-edit" onClick={() => setEditMode({...editMode, valorant: true})} title="Settings">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                             </button>
@@ -189,7 +171,7 @@ export const ProfilePage: React.FC<{ user: any; setUser: (user: any) => void }> 
                             <p className="name">{user.faceitNickname}</p>
                         </div>
                         <div className="passport__actions">
-                            <button className="btn-view btn-view--cs2" onClick={() => navigate('/cs2', { state: { autoSearch: true, nickname: user.faceitNickname } })}>View Stats</button>
+                            <button className="btn-view btn-view--cs2" onClick={() => navigate(cs2Path(user.faceitNickname!))}>View Stats</button>
                             <button className="btn-edit" onClick={() => setEditMode({...editMode, cs2: true})} title="Settings">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                             </button>

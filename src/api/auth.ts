@@ -1,32 +1,28 @@
 import { API } from './client';
+import { User } from './types';
 
-export const loginUser = async (email: string, password: string) => {
-    const response = await API.post('/auth/login', { email, password });
+// Токен додає interceptor у client.ts
+export const loginUser = async (email: string, password: string): Promise<{ token: string; user: User }> => {
+    const response = await API.post('/auth/login', { email, password }, { silent: true });
     return response.data;
 };
 
-export const registerUser = async (email: string, password: string) => {
-    const response = await API.post('/auth/register', { email, password });
+export const registerUser = async (email: string, password: string): Promise<{ token: string; user: User }> => {
+    const response = await API.post('/auth/register', { email, password }, { silent: true });
     return response.data;
 };
 
-export const linkUserAccounts = async (token: string, data: { dotaId?: string, valName?: string, valTag?: string, faceitNickname?: string }) => {
-    const response = await API.put('/auth/link', data, {
-        headers: { Authorization: `Bearer ${token}` }
-    });
+export const linkUserAccounts = async (data: { dotaId?: string, valName?: string, valTag?: string, faceitNickname?: string }): Promise<{ user: User }> => {
+    const response = await API.put('/auth/link', data);
     return response.data;
 };
 
-export const getMe = async (token: string) => {
-    const response = await API.get('/auth/me', {
-        headers: { Authorization: `Bearer ${token}` }
-    });
+export const getMe = async (): Promise<{ user: User }> => {
+    const response = await API.get('/auth/me', { silent: true });
     return response.data;
 };
 
-export const updateUserProfile = async (token: string, data: { displayName: string }) => {
-    const response = await API.put('/auth/profile', data, {
-        headers: { Authorization: `Bearer ${token}` }
-    });
+export const updateUserProfile = async (data: { displayName: string }): Promise<{ user: User }> => {
+    const response = await API.put('/auth/profile', data);
     return response.data;
 };

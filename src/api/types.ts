@@ -23,6 +23,7 @@ export interface MatchSummary {
 // 🎮 CS2
 export interface Cs2Data {
     profile: {
+        playerId: string;
         nickname: string;
         avatar: string;
         country: string;
@@ -96,6 +97,7 @@ export interface ValorantData {
         rank: string;
         rank_img: string;
         elo: number;
+        mmr?: number | null;
         peakRank: string;
         totalGames: number;
         totalWinRate: string | number;
@@ -136,4 +138,32 @@ export interface FavoriteProfileItem {
     payload: Record<string, string>;
     createdAt: string;
     updatedAt: string;
+}
+
+export type ProgressGame = 'valorant' | 'cs2' | 'dota';
+
+export interface ProgressPoint {
+    date: string;
+    elo?: number | null;
+    level?: number | null;
+    rank?: string | null;
+    rankTier?: number | null;
+    kd?: number | null;
+    winRate?: number | null;
+    matches?: number | null;
+}
+
+export interface Overview {
+    playersTracked: number;
+    profilesChecked24h: number;
+}
+
+export interface User {
+    id: number;
+    email: string;
+    displayName: string | null;
+    valName: string | null;
+    valTag: string | null;
+    dotaId: string | null;
+    faceitNickname: string | null;
 }

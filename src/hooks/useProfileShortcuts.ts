@@ -1,6 +1,8 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useMemo } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { gameApi } from '../api/client';
 import { FavoriteProfileItem, SearchHistoryItem } from '../api/types';
+import { HISTORY_GAME } from '../routes';
 
 export type GameShortcutKey = 'valorant' | 'dota' | 'cs2';
 
@@ -15,12 +17,6 @@ export interface ProfileShortcut {
 const MAX_RECENT = 6;
 const MAX_FAVORITES = 9;
 
-const historyGameName: Record<GameShortcutKey, string> = {
-    valorant: 'Valorant',
-    dota: 'Dota 2',
-    cs2: 'CS2',
-};
-
 const normalizePayload = (payload: unknown): Record<string, string> => {
     if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return {};
 
@@ -28,19 +24,6 @@ const normalizePayload = (payload: unknown): Record<string, string> => {
         if (value !== undefined && value !== null) acc[key] = String(value);
         return acc;
     }, {});
-};
-
-const normalizeShortcut = (shortcut: ProfileShortcut): ProfileShortcut => ({
-    ...shortcut,
-    label: shortcut.label.trim(),
-    subtitle: shortcut.subtitle?.trim(),
-    payload: normalizePayload(shortcut.payload),
-    updatedAt: shortcut.updatedAt || Date.now(),
-});
-
-const upsertShortcut = (items: ProfileShortcut[], shortcut: ProfileShortcut, limit: number) => {
-    const normalized = normalizeShortcut(shortcut);
-    return [normalized, ...items.filter(item => item.id !== normalized.id)].slice(0, limit);
 };
 
 const favoriteToShortcut = (favorite: FavoriteProfileItem): ProfileShortcut => ({
@@ -54,6 +37,7 @@ const favoriteToShortcut = (favorite: FavoriteProfileItem): ProfileShortcut => (
 const historyToShortcut = (game: GameShortcutKey, item: SearchHistoryItem): ProfileShortcut | null => {
     const query = item.query.trim();
     if (!query) return null;
+    const updatedAt = new Date(item.createdAt).getTime();
 
     if (game === 'valorant') {
         const [name, tag] = query.split('#');
@@ -64,124 +48,86 @@ const historyToShortcut = (game: GameShortcutKey, item: SearchHistoryItem): Prof
             label: `${name}#${tag}`,
             subtitle: 'Search history',
             payload: { name, tag },
-            updatedAt: new Date(item.createdAt).getTime(),
+            updatedAt,
         };
     }
 
     if (game === 'dota') {
-        return {
-            id: `dota:${query}`,
-            label: query,
-            subtitle: 'Steam 32-bit ID',
-            payload: { id: query },
-            updatedAt: new Date(item.createdAt).getTime(),
-        };
+        return { id: `dota:${query}`, label: query, subtitle: 'Steam 32-bit ID', payload: { id: query }, updatedAt };
     }
 
-    return {
-        id: `cs2:${query.toLowerCase()}`,
-        label: query,
-        subtitle: 'Faceit nickname',
-        payload: { nickname: query },
-        updatedAt: new Date(item.createdAt).getTime(),
-    };
+    return { id: `cs2:${query.toLowerCase()}`, label: query, subtitle: 'Faceit nickname', payload: { nickname: query }, updatedAt };
 };
 
-export const useProfileShortcuts = (game: GameShortcutKey, user?: any) => {
-    const userId = user?.id ? String(user.id) : '';
-    const canSync = Boolean(userId);
-    const [recent, setRecent] = useState<ProfileShortcut[]>([]);
-    const [favorites, setFavorites] = useState<ProfileShortcut[]>([]);
-    const [isLoadingShortcuts, setIsLoadingShortcuts] = useState(false);
+export const useProfileShortcuts = (game: GameShortcutKey, user?: { id?: number } | null) => {
+    const canSync = Boolean(user?.id);
+    const queryClient = useQueryClient();
+    const favoritesKey = ['favorites', game];
 
-    const refreshRecent = useCallback(async () => {
-        if (!canSync) {
-            setRecent([]);
-            return;
-        }
+    const historyQuery = useQuery({
+        queryKey: ['history'],
+        queryFn: gameApi.getHistory,
+        enabled: canSync,
+    });
 
-        const history = await gameApi.getHistory();
-        const shortcuts = history
-            .filter(item => item.game === historyGameName[game])
-            .map(item => historyToShortcut(game, item))
-            .filter((item): item is ProfileShortcut => Boolean(item))
-            .slice(0, MAX_RECENT);
+    const favoritesQuery = useQuery({
+        queryKey: favoritesKey,
+        queryFn: () => gameApi.getFavorites(game),
+        enabled: canSync,
+    });
 
-        setRecent(shortcuts);
-    }, [canSync, game]);
+    const recent = useMemo(() => (historyQuery.data || [])
+        .filter(item => item.game === HISTORY_GAME[game])
+        .map(item => historyToShortcut(game, item))
+        .filter((item): item is ProfileShortcut => Boolean(item))
+        .slice(0, MAX_RECENT), [historyQuery.data, game]);
 
-    const refreshFavorites = useCallback(async () => {
-        if (!canSync) {
-            setFavorites([]);
-            return;
-        }
+    const favorites = useMemo(
+        () => (favoritesQuery.data || []).map(favoriteToShortcut).slice(0, MAX_FAVORITES),
+        [favoritesQuery.data],
+    );
 
-        const items = await gameApi.getFavorites(game);
-        setFavorites(items.map(favoriteToShortcut).slice(0, MAX_FAVORITES));
-    }, [canSync, game]);
+    const invalidateFavorites = () => queryClient.invalidateQueries({ queryKey: favoritesKey });
 
-    const refreshShortcuts = useCallback(async () => {
-        setIsLoadingShortcuts(true);
-        try {
-            await Promise.all([refreshRecent(), refreshFavorites()]);
-        } finally {
-            setIsLoadingShortcuts(false);
-        }
-    }, [refreshRecent, refreshFavorites]);
-
-    useEffect(() => {
-        refreshShortcuts().catch(() => {
-            setRecent([]);
-            setFavorites([]);
-            setIsLoadingShortcuts(false);
-        });
-    }, [refreshShortcuts, userId]);
-
-    const addRecent = useCallback((shortcut: ProfileShortcut) => {
-        if (!canSync) return;
-        setRecent(previous => upsertShortcut(previous, shortcut, MAX_RECENT));
-    }, [canSync]);
-
-    const toggleFavorite = useCallback(async (shortcut: ProfileShortcut) => {
-        if (!canSync) return false;
-
-        const normalized = normalizeShortcut(shortcut);
-        const exists = favorites.some(item => item.id === normalized.id);
-
-        if (exists) {
-            await gameApi.deleteFavorite(normalized.id);
-            setFavorites(previous => previous.filter(item => item.id !== normalized.id));
-            return false;
-        }
-
-        const saved = await gameApi.saveFavorite({
-            shortcutId: normalized.id,
+    const saveMutation = useMutation({
+        mutationFn: (shortcut: ProfileShortcut) => gameApi.saveFavorite({
+            shortcutId: shortcut.id,
             game,
-            label: normalized.label,
-            subtitle: normalized.subtitle,
-            payload: normalized.payload,
-        });
-        setFavorites(previous => upsertShortcut(previous, favoriteToShortcut(saved), MAX_FAVORITES));
-        return true;
-    }, [canSync, favorites, game]);
+            label: shortcut.label.trim(),
+            subtitle: shortcut.subtitle?.trim(),
+            payload: normalizePayload(shortcut.payload),
+        }),
+        onSuccess: invalidateFavorites,
+    });
 
-    const removeFavorite = useCallback(async (id: string) => {
-        if (!canSync) return;
-
-        await gameApi.deleteFavorite(id);
-        setFavorites(previous => previous.filter(item => item.id !== id));
-    }, [canSync]);
+    const removeMutation = useMutation({
+        mutationFn: (id: string) => gameApi.deleteFavorite(id),
+        onSuccess: invalidateFavorites,
+    });
 
     const isFavorite = useCallback((id: string) => favorites.some(item => item.id === id), [favorites]);
 
+    const toggleFavorite = async (shortcut: ProfileShortcut) => {
+        if (!canSync) return false;
+
+        if (isFavorite(shortcut.id)) {
+            await removeMutation.mutateAsync(shortcut.id);
+            return false;
+        }
+
+        await saveMutation.mutateAsync(shortcut);
+        return true;
+    };
+
+    const removeFavorite = async (id: string) => {
+        if (!canSync) return;
+        await removeMutation.mutateAsync(id);
+    };
+
     return {
-        recent,
-        favorites,
+        recent: canSync ? recent : [],
+        favorites: canSync ? favorites : [],
         canSync,
-        isLoadingShortcuts,
-        addRecent,
-        refreshRecent,
-        refreshFavorites,
         toggleFavorite,
         removeFavorite,
         isFavorite,

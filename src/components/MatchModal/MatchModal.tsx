@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { gameApi } from '../../api/client';
+import { useModal } from '../../hooks/useModal';
+import { valorantPath } from '../../routes';
 import './MatchModal.scss';
 
 interface MatchModalProps { matchId: string; onClose: () => void; }
@@ -11,10 +13,7 @@ export const MatchModal: React.FC<MatchModalProps> = ({ matchId, onClose }) => {
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
-    useEffect(() => {
-        document.body.style.overflow = 'hidden';
-        return () => { document.body.style.overflow = 'unset'; };
-    }, []);
+    useModal(onClose);
 
     useEffect(() => {
         gameApi.getValorantMatch(matchId)
@@ -25,7 +24,7 @@ export const MatchModal: React.FC<MatchModalProps> = ({ matchId, onClose }) => {
 
     const handlePlayerClick = (name: string, tag: string) => {
         onClose(); // Закриваємо модалку
-        navigate('/valorant', { state: { autoSearch: true, name, tag } }); // Шукаємо гравця
+        navigate(valorantPath(name, tag));
     };
 
     const renderTeam = (teamName: string, players: any[], color: string) => (
@@ -51,8 +50,8 @@ export const MatchModal: React.FC<MatchModalProps> = ({ matchId, onClose }) => {
 
     const modalContent = (
         <div className="match-modal-overlay" onClick={onClose}>
-            <div className="match-modal-content" onClick={e => e.stopPropagation()}>
-                <button className="close-btn" onClick={onClose}>✕</button>
+            <div role="dialog" aria-modal="true" className="match-modal-content" onClick={e => e.stopPropagation()}>
+                <button className="close-btn" onClick={onClose} aria-label="Close">✕</button>
                 {loading ? <h2 style={{color: '#fff'}}>Loading match data...</h2> : matchData ? (
                     <>
                         <h2 className="match-modal-title" style={{color: '#ff4655'}}>

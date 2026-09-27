@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AuthModal } from '../AuthModal/AuthModal';
+import { User } from '../../api/types';
 import './Header.scss';
 
-interface HeaderProps { user: any; setUser: (user: any) => void; }
+interface HeaderProps { user: User | null; setUser: (user: User | null) => void; }
 
 export const Header: React.FC<HeaderProps> = ({ user, setUser }) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -27,7 +28,7 @@ export const Header: React.FC<HeaderProps> = ({ user, setUser }) => {
         setIsDropdownOpen(false); 
     };
 
-    const isActive = (path: string) => location.pathname === path ? 'active' : '';
+    const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(`${path}/`) ? 'active' : '';
 
     // 🔥 МАГІЯ ТУТ: Пріоритет на displayName
     // displayName — це те, що ми бачимо в меню
@@ -37,9 +38,9 @@ export const Header: React.FC<HeaderProps> = ({ user, setUser }) => {
 
     return (
         <header className="header">
-            <div className="header__logo" onClick={() => navigate('/')} style={{cursor: 'pointer'}}>
+            <button type="button" className="header__logo" onClick={() => navigate('/')} style={{cursor: 'pointer', background: 'none', border: 'none', color: 'inherit', fontFamily: 'inherit', padding: 0}}>
                 ESPORTS TRACKER
-            </div>
+            </button>
 
             <nav className="header__nav">
                 <button className={`header__nav-item ${isActive('/valorant')}`} onClick={() => navigate('/valorant')}>Valorant</button>
@@ -53,7 +54,7 @@ export const Header: React.FC<HeaderProps> = ({ user, setUser }) => {
                 </button>
 
                 <div className="header__profile" ref={dropdownRef}>
-                    <button className="header__avatar-btn" onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
+                    <button className="header__avatar-btn" onClick={() => setIsDropdownOpen(!isDropdownOpen)} aria-label="Account menu" aria-expanded={isDropdownOpen}>
                         {user ? (
                             <div className="header__avatar-pic">{displayLetter}</div>
                         ) : (

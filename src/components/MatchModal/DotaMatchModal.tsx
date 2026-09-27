@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { gameApi } from '../../api/client';
+import { useModal } from '../../hooks/useModal';
+import { dotaPath } from '../../routes';
 import './MatchModal.scss';
 
 const HERO_PLACEHOLDER = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2236%22 height=%2236%22 viewBox=%220 0 36 36%22%3E%3Crect width=%2236%22 height=%2236%22 rx=%228%22 fill=%22%232a2a35%22/%3E%3Ctext x=%2218%22 y=%2223%22 text-anchor=%22middle%22 font-size=%2216%22 font-family=%22Arial%22 fill=%22%23a1a1aa%22%3E%3F%3C/text%3E%3C/svg%3E';
@@ -11,10 +13,7 @@ export const DotaMatchModal: React.FC<{ matchId: string; onClose: () => void }> 
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
-    useEffect(() => {
-        document.body.style.overflow = 'hidden';
-        return () => { document.body.style.overflow = 'unset'; };
-    }, []);
+    useModal(onClose);
 
     useEffect(() => {
         gameApi.getDotaMatch(matchId)
@@ -26,7 +25,7 @@ export const DotaMatchModal: React.FC<{ matchId: string; onClose: () => void }> 
     const handlePlayerClick = (accountId: string | number) => {
         if (!accountId) return; // Якщо анонім - нічого не робимо
         onClose();
-        navigate('/dota', { state: { autoSearch: true, id: accountId.toString() } });
+        navigate(dotaPath(accountId.toString()));
     };
 
     const renderTeam = (teamName: string, isRadiant: boolean, players: any[], color: string) => {
@@ -73,8 +72,8 @@ export const DotaMatchModal: React.FC<{ matchId: string; onClose: () => void }> 
 
     const modalContent = (
         <div className="match-modal-overlay" onClick={onClose}>
-            <div className="match-modal-content" onClick={e => e.stopPropagation()}>
-                <button className="close-btn" onClick={onClose}>✕</button>
+            <div role="dialog" aria-modal="true" className="match-modal-content" onClick={e => e.stopPropagation()}>
+                <button className="close-btn" onClick={onClose} aria-label="Close">✕</button>
                 {loading ? <h2 style={{color: '#fff'}}>Loading match data...</h2> : matchData ? (
                     <>
                         <h2 className="match-modal-title" style={{color: '#d94b38'}}>

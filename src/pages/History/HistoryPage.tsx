@@ -1,69 +1,41 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 import { gameApi } from '../../api/client';
+import { SearchHistoryItem, User } from '../../api/types';
+import { historyEntryPath } from '../../routes';
 import './HistoryPage.scss';
 
-interface HistoryEntry {
-    id: number;
-    game: string;
-    query: string;
-    createdAt: string;
-}
+const formatDate = (dateString: string) =>
+    new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(dateString));
 
-export const HistoryPage: React.FC = () => {
-    const [history, setHistory] = useState<HistoryEntry[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+export const HistoryPage: React.FC<{ user?: User | null }> = ({ user }) => {
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
+    const [confirmClear, setConfirmClear] = useState(false);
 
-    const token = localStorage.getItem('token');
+    const { data: history = [], isLoading, isError } = useQuery({
+        queryKey: ['history'],
+        queryFn: gameApi.getHistory,
+        enabled: Boolean(user),
+    });
 
-    useEffect(() => {
-        if (!token) {
-            setLoading(false);
-            return;
-        }
+    const clearMutation = useMutation({
+        mutationFn: gameApi.clearHistory,
+        onSuccess: () => {
+            queryClient.setQueryData(['history'], []);
+            toast.success('History cleared');
+        },
+        onSettled: () => setConfirmClear(false),
+    });
 
-        const fetchHistory = async () => {
-            try {
-                const data = await gameApi.getHistory();
-                setHistory(data);
-            } catch (err) {
-                setError('Failed to load history');
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchHistory();
-    }, [token]);
-
-    // 🔥 ФУНКЦІЯ ОЧИЩЕННЯ
-    const handleClearHistory = async () => {
-        if (!window.confirm('Are you sure you want to clear your entire search history?')) return;
-        try {
-            await gameApi.clearHistory();
-            setHistory([]); // Миттєво очищаємо екран
-        } catch (err) {
-            alert('Failed to clear history');
-        }
+    const handleCardClick = (entry: SearchHistoryItem) => {
+        const path = historyEntryPath(entry.game, entry.query);
+        if (path) navigate(path);
     };
 
-    const handleCardClick = (entry: HistoryEntry) => {
-        const game = entry.game.toLowerCase();
-        if (game === 'valorant') {
-            const [name, tag] = entry.query.split('#');
-            if (name && tag) navigate('/valorant', { state: { autoSearch: true, name, tag } });
-        } 
-        else if (game === 'dota 2') navigate('/dota', { state: { autoSearch: true, id: entry.query } });
-        else if (game === 'cs2') navigate('/cs2', { state: { autoSearch: true, nickname: entry.query } });
-    };
-
-    const formatDate = (dateString: string) => {
-        return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(dateString));
-    };
-
-    // 🔥 ЕКРАН ДЛЯ ГОСТЯ
-    if (!token && !loading) {
+    if (!user) {
         return (
             <div className="history-page fade-in-up">
                 <div className="history-page__empty">
@@ -74,7 +46,7 @@ export const HistoryPage: React.FC = () => {
         );
     }
 
-    if (loading) return <div className="history-page__loading">Loading...</div>;
+    if (isLoading) return <div className="history-page__loading" role="status">Loading...</div>;
 
     return (
         <div className="history-page fade-in-up">
@@ -83,19 +55,30 @@ export const HistoryPage: React.FC = () => {
                     <h1 className="history-page__title">Search History</h1>
                     <p className="history-page__subtitle">Your personal recent player lookups</p>
                 </div>
-                
-                {/* 🔥 КНОПКА ОЧИЩЕННЯ */}
+
                 {history.length > 0 && (
-                    <button className="history-page__clear-btn" onClick={handleClearHistory}>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                        Clear History
-                    </button>
+                    confirmClear ? (
+                        <div className="history-page__confirm">
+                            <span>Clear all history?</span>
+                            <button className="history-page__clear-btn" onClick={() => clearMutation.mutate()} disabled={clearMutation.isPending}>
+                                Yes, clear
+                            </button>
+                            <button className="history-page__cancel-btn" onClick={() => setConfirmClear(false)}>
+                                Cancel
+                            </button>
+                        </div>
+                    ) : (
+                        <button className="history-page__clear-btn" onClick={() => setConfirmClear(true)}>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            Clear History
+                        </button>
+                    )
                 )}
             </div>
 
-            {error && <div className="history-page__error">{error}</div>}
+            {isError && <div className="history-page__error" role="alert">Failed to load history</div>}
 
-            {history.length === 0 && !error ? (
+            {history.length === 0 && !isError ? (
                 <div className="history-page__empty">
                     <p>Your history is empty.</p>
                     <span>Start searching for players to see them here!</span>
@@ -113,7 +96,7 @@ export const HistoryPage: React.FC = () => {
                                 <h3 className="history-card__query">{entry.query}</h3>
                                 <div className="history-card__action">
                                     <span>Click to view stats</span>
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                                 </div>
                             </button>
                         );

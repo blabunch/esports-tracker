@@ -1,16 +1,27 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import App from './App';
+import { gameApi } from './api/client';
 
-vi.mock('react-router-dom', () => ({
-  BrowserRouter: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  Routes: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  Route: ({ path, element }: { path: string; element: React.ReactElement }) => path === '/' ? element : null,
-  useLocation: () => ({ pathname: '/', state: null }),
-  useNavigate: () => vi.fn(),
-}));
+afterEach(() => vi.restoreAllMocks());
 
-test('renders tracker shell', async () => {
-  render(<App />);
-  expect(await screen.findByText(/ESPORTS TRACKER/i)).toBeInTheDocument();
+describe('App', () => {
+  it('shows real overview numbers on the homepage', async () => {
+    vi.spyOn(gameApi, 'getOverview').mockResolvedValue({ playersTracked: 1234, profilesChecked24h: 56 });
+
+    render(<App />);
+
+    expect(await screen.findByText('1,234')).toBeInTheDocument();
+    expect(screen.getByText('56')).toBeInTheDocument();
+    expect(screen.queryByText('300M+')).not.toBeInTheDocument();
+  });
+
+  it('renders a 404 page for unknown routes', async () => {
+    vi.spyOn(gameApi, 'getOverview').mockResolvedValue({ playersTracked: 0, profilesChecked24h: 0 });
+    window.history.pushState({}, '', '/does-not-exist');
+
+    render(<App />);
+
+    expect(await screen.findByText('Page not found')).toBeInTheDocument();
+  });
 });

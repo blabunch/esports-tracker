@@ -17,6 +17,19 @@
         cursor: pointer; transition: 0.3s; font-family: 'Outfit', sans-serif;
         svg { width: 18px; height: 18px; }
         &:hover { background: rgba(255, 70, 85, 0.2); transform: translateY(-2px); border-color: #ff4655; }
+        &:disabled { opacity: 0.6; cursor: wait; }
+    }
+
+    &__confirm {
+        display: flex; align-items: center; flex-wrap: wrap; gap: 12px;
+        color: #a1a1aa; font-weight: 600;
+    }
+
+    &__cancel-btn {
+        background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #fff; padding: 12px 20px; border-radius: 12px; font-weight: 700; font-size: 14px;
+        cursor: pointer; font-family: 'Outfit', sans-serif;
+        &:hover { background: rgba(255, 255, 255, 0.1); }
     }
 
     &__error { 

@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { loginUser, registerUser } from '../../api/auth';
+import { User } from '../../api/types';
+import { useModal } from '../../hooks/useModal';
 import './AuthModal.scss';
 
 interface AuthModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSuccess: (user: any) => void;
+    onSuccess: (user: User) => void;
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess }) => {
@@ -14,6 +16,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    useModal(onClose, isOpen);
 
     if (!isOpen) return null;
 
@@ -34,8 +37,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
             localStorage.setItem('token', data.token);
             onSuccess(data.user);
             onClose();
-        } catch (err: any) {
-            setError(err.message || 'Something went wrong');
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Something went wrong');
         } finally {
             setLoading(false);
         }
@@ -43,10 +46,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
 
     return (
         <div className="auth-overlay">
-            <div className="auth-modal fade-in-up">
-                <button className="auth-modal__close" onClick={onClose}>×</button>
+            <div className="auth-modal fade-in-up" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
+                <button className="auth-modal__close" onClick={onClose} aria-label="Close">×</button>
                 
-                <h2 className="auth-modal__title">{isLogin ? 'Welcome Back' : 'Create Account'}</h2>
+                <h2 className="auth-modal__title" id="auth-modal-title">{isLogin ? 'Welcome Back' : 'Create Account'}</h2>
                 <p className="auth-modal__subtitle">
                     {isLogin ? 'Log in to track your stats' : 'Join the ultimate esports tracker'}
                 </p>

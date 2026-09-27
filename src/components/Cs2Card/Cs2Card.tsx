@@ -35,19 +35,20 @@ interface Cs2CardProps {
   onMatchClick?: (matchId: string) => void; 
 }
 
-export const Cs2Card: React.FC<Cs2CardProps> = ({ data, onMatchClick }) => {
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div style={{ background: 'rgba(9,9,11,0.9)', padding: '12px', border: '1px solid var(--glass-border)', borderRadius: '12px', backdropFilter: 'blur(8px)', fontFamily: "'Outfit', sans-serif" }}>
-          <p style={{ color: 'var(--text-muted)', fontSize: '12px', marginBottom: '4px', textTransform: 'uppercase' }}>{label}</p>
-          <p style={{ color: 'var(--color-cs2)', fontWeight: '800', fontSize: '16px' }}>Avg K/D: {payload[0].value}</p>
-        </div>
-      );
-    }
-    return null;
-  };
+// Оголошено поза компонентом картки, щоб не створювати новий компонент на кожен рендер
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div style={{ background: 'rgba(9,9,11,0.9)', padding: '12px', border: '1px solid var(--glass-border)', borderRadius: '12px', backdropFilter: 'blur(8px)', fontFamily: "'Outfit', sans-serif" }}>
+        <p style={{ color: 'var(--text-muted)', fontSize: '12px', marginBottom: '4px', textTransform: 'uppercase' }}>{label}</p>
+        <p style={{ color: 'var(--color-cs2)', fontWeight: '800', fontSize: '16px' }}>Avg K/D: {payload[0].value}</p>
+      </div>
+    );
+  }
+  return null;
+};
 
+export const Cs2Card: React.FC<Cs2CardProps> = ({ data, onMatchClick }) => {
   return (
     <div className="cs2-card fade-in-up">
       {/* --- ЛІВА ПАНЕЛЬ --- */}

@@ -14,6 +14,21 @@ interface ValorantCardProps {
   onMatchClick?: (matchId: string) => void;
 }
 
+// Оголошено поза компонентом картки, щоб не створювати новий компонент на кожен рендер
+const CustomTooltip = ({ active, payload, label, showHint }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div style={{ background: 'rgba(9,9,11,0.9)', padding: '12px', border: '1px solid var(--glass-border)', borderRadius: '12px', backdropFilter: 'blur(8px)', fontFamily: "'Outfit', sans-serif" }}>
+        <p style={{ color: 'var(--text-muted)', fontSize: '12px', marginBottom: '4px' }}>{label}</p>
+        <p style={{ color: 'var(--color-val)', fontWeight: '800', fontSize: '16px' }}>ACS: {payload[0].value}</p>
+        <p style={{ color: '#fff', fontSize: '14px' }}>Kills: {payload[1].value}</p>
+        {showHint && <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', marginTop: '8px', textTransform: 'uppercase' }}>Click to view match</p>}
+      </div>
+    );
+  }
+  return null;
+};
+
 export const ValorantCard: React.FC<ValorantCardProps> = ({ data, onMatchClick }) => {
   const hasMatches = Boolean(data.stats.hasMatches ?? data.matches?.length);
   const matchLimit = data.stats.matchLimit || 10;
@@ -24,20 +39,6 @@ export const ValorantCard: React.FC<ValorantCardProps> = ({ data, onMatchClick }
   const totalGames = data.stats.totalGames || data.matches?.length || 0;
   const recentMatches = (data.matches || []).slice(0, matchLimit);
   const bestMap = mapStats[0];
-
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div style={{ background: 'rgba(9,9,11,0.9)', padding: '12px', border: '1px solid var(--glass-border)', borderRadius: '12px', backdropFilter: 'blur(8px)', fontFamily: "'Outfit', sans-serif" }}>
-          <p style={{ color: 'var(--text-muted)', fontSize: '12px', marginBottom: '4px' }}>{label}</p>
-          <p style={{ color: 'var(--color-val)', fontWeight: '800', fontSize: '16px' }}>ACS: {payload[0].value}</p>
-          <p style={{ color: '#fff', fontSize: '14px' }}>Kills: {payload[1].value}</p>
-          {onMatchClick && <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', marginTop: '8px', textTransform: 'uppercase' }}>Click to view match</p>}
-        </div>
-      );
-    }
-    return null;
-  };
 
   const winRateValue = parseFloat(data.stats.totalWinRate);
   const winRateColor = Number.isFinite(winRateValue) && winRateValue >= 50 ? '#2ecc71' : '#ff4655';
@@ -171,7 +172,7 @@ export const ValorantCard: React.FC<ValorantCardProps> = ({ data, onMatchClick }
                   <defs>
                     <linearGradient id="colorAcs" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#ff4655" stopOpacity={0.6}/><stop offset="95%" stopColor="#ff4655" stopOpacity={0}/></linearGradient>
                   </defs>
-                  <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'var(--glass-border)', strokeWidth: 1, strokeDasharray: '3 3' }} />
+                  <Tooltip content={<CustomTooltip showHint={Boolean(onMatchClick)} />} cursor={{ stroke: 'var(--glass-border)', strokeWidth: 1, strokeDasharray: '3 3' }} />
                   <Area type="monotone" dataKey="acs" stroke="#ff4655" strokeWidth={3} fillOpacity={1} fill="url(#colorAcs)" activeDot={{ r: 6, strokeWidth: 0, fill: '#fff' }} />
                   <Area type="monotone" dataKey="kills" stroke="#fff" strokeWidth={2} fillOpacity={0} />
                 </AreaChart>

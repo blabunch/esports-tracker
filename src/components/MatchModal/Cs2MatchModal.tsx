@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { gameApi } from '../../api/client';
+import { useModal } from '../../hooks/useModal';
+import { cs2Path } from '../../routes';
 import './MatchModal.scss';
 
 const formatMapName = (name?: string) => (name || 'Match').replace(/^de_/i, '').replace(/_/g, ' ').toUpperCase();
@@ -12,10 +14,7 @@ export const Cs2MatchModal: React.FC<{ matchId: string; onClose: () => void }> =
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
-    useEffect(() => {
-        document.body.style.overflow = 'hidden';
-        return () => { document.body.style.overflow = 'unset'; };
-    }, []);
+    useModal(onClose);
 
     useEffect(() => {
         gameApi.getCs2Match(matchId)
@@ -28,7 +27,7 @@ export const Cs2MatchModal: React.FC<{ matchId: string; onClose: () => void }> =
 
     const handlePlayerClick = (nickname: string) => {
         onClose();
-        navigate('/cs2', { state: { autoSearch: true, nickname } });
+        navigate(cs2Path(nickname));
     };
 
     const renderTeam = (team: any) => {
@@ -67,8 +66,8 @@ export const Cs2MatchModal: React.FC<{ matchId: string; onClose: () => void }> =
 
     const modalContent = (
         <div className="match-modal-overlay" onClick={onClose}>
-            <div className="match-modal-content" onClick={e => e.stopPropagation()}>
-                <button className="close-btn" onClick={onClose}>✕</button>
+            <div role="dialog" aria-modal="true" className="match-modal-content" onClick={e => e.stopPropagation()}>
+                <button className="close-btn" onClick={onClose} aria-label="Close">✕</button>
                 {loading ? <h2 style={{color: '#fff'}}>Loading match data...</h2> : matchData ? (
                     <>
                         <h2 className="match-modal-title" style={{color: '#ffa500'}}>

@@ -18,21 +18,22 @@ interface DotaCardProps {
   onMatchClick?: (matchId: string) => void; 
 }
 
+// Оголошено поза компонентом картки, щоб не створювати новий компонент на кожен рендер
+const CustomTooltip = ({ active, payload, label, showHint }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div style={{ background: 'rgba(9,9,11,0.9)', padding: '12px', border: '1px solid var(--glass-border)', borderRadius: '12px', backdropFilter: 'blur(8px)', fontFamily: "'Outfit', sans-serif" }}>
+        <p style={{ color: 'var(--text-muted)', fontSize: '12px', marginBottom: '4px' }}>{label}</p>
+        <p style={{ color: 'var(--color-dota)', fontWeight: '800', fontSize: '16px' }}>KDA Ratio: {payload[0].value}</p>
+        {showHint && <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', marginTop: '8px', textTransform: 'uppercase' }}>Click to view details</p>}
+      </div>
+    );
+  }
+  return null;
+};
+
 export const DotaCard: React.FC<DotaCardProps> = ({ data, onMatchClick }) => {
   const rankInfo = getRankInfo(data.profile.rank_tier);
-
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div style={{ background: 'rgba(9,9,11,0.9)', padding: '12px', border: '1px solid var(--glass-border)', borderRadius: '12px', backdropFilter: 'blur(8px)', fontFamily: "'Outfit', sans-serif" }}>
-          <p style={{ color: 'var(--text-muted)', fontSize: '12px', marginBottom: '4px' }}>{label}</p>
-          <p style={{ color: 'var(--color-dota)', fontWeight: '800', fontSize: '16px' }}>KDA Ratio: {payload[0].value}</p>
-          {onMatchClick && <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', marginTop: '8px', textTransform: 'uppercase' }}>Click to view details</p>}
-        </div>
-      );
-    }
-    return null;
-  };
 
   return (
     <div className="dota-card fade-in-up">
@@ -149,7 +150,7 @@ export const DotaCard: React.FC<DotaCardProps> = ({ data, onMatchClick }) => {
                       <stop offset="95%" stopColor="#d94b38" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
-                  <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'var(--glass-border)', strokeWidth: 1, strokeDasharray: '3 3' }} />
+                  <Tooltip content={<CustomTooltip showHint={Boolean(onMatchClick)} />} cursor={{ stroke: 'var(--glass-border)', strokeWidth: 1, strokeDasharray: '3 3' }} />
                   <Area type="monotone" dataKey="kda" stroke="#d94b38" strokeWidth={3} fillOpacity={1} fill="url(#colorKda)" activeDot={{ r: 6, strokeWidth: 0, fill: '#fff' }}/>
                 </AreaChart>
               </ResponsiveContainer>
