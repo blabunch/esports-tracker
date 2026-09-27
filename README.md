@@ -4,6 +4,8 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
+**Live demo: [esports-tracker-h80i.onrender.com](https://esports-tracker-h80i.onrender.com)** — hosted on a free plan, so the first request after inactivity may take up to a minute.
+
 A full-stack web app for looking up player statistics in **Valorant**, **Dota 2** and **CS2 (Faceit)** — search any player, see their recent form and match scoreboards, and **follow how their rating changes over time**.
 
 Built with **React + TypeScript + Vite** on the frontend and **Node.js / Express + Prisma + PostgreSQL** on the backend, which aggregates data from three public game APIs.
@@ -147,9 +149,10 @@ The repository includes a [`render.yaml`](render.yaml) Blueprint that deploys th
 1. Create a Neon project and copy its connection string (`postgresql://...?sslmode=require`).
 2. In Render choose **New → Blueprint**, select this repository and fill in the prompted values:
    `DATABASE_URL`, `FACEIT_API_KEY`, `HENRIKDEV_API_KEY`,
-   `FRONTEND_URL=https://esports-tracker.onrender.com`,
-   `VITE_API_URL=https://esports-tracker-api.onrender.com/api`
-   (adjust the URLs if Render assigns different service names).
+   `FRONTEND_URL` — the public URL of the static site (e.g. `https://esports-tracker-xxxx.onrender.com`),
+   `VITE_API_URL` — the API URL plus `/api` (e.g. `https://esports-tracker-api.onrender.com/api`).
+   Render may append a random suffix to a service name if it is taken — use the actual URLs, otherwise CORS will block requests.
+   Paste API keys as bare values, without the variable name or quotes.
 3. Migrations run automatically on every API start.
 
 Free Render services sleep after 15 minutes without traffic; the site shows a "waking up" notice while the API starts (up to a minute).
