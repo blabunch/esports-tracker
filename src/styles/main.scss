@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+// Шрифт Outfit підключається в index.html (preconnect + link), щоб не чекати на ланцюжок CSS-імпортів
 
 :root {
   --bg-dark: #09090b;
@@ -47,12 +47,20 @@ a {
 
 body {
   background-color: var(--bg-dark);
-  background-image: var(--bg-gradient);
-  background-attachment: fixed;
   color: var(--text-main);
   font-family: 'Outfit', sans-serif;
   min-height: 100vh;
   overflow-x: hidden;
+}
+
+/* Градієнт на фіксованому шарі: браузер малює його один раз, а не на кожному кроці прокрутки */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--bg-gradient);
 }
 
 /* Global Animations */

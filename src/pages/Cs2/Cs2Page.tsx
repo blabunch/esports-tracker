@@ -6,6 +6,7 @@ import { Cs2MatchModal } from '../../components/MatchModal/Cs2MatchModal';
 import { SkeletonCard } from '../../components/Skeleton/Skeleton';
 import { SearchMemoryPanel } from '../../components/SearchMemoryPanel/SearchMemoryPanel';
 import { ProgressChart } from '../../components/ProgressChart/ProgressChart';
+import { PageBackground } from '../../components/PageBackground/PageBackground';
 import { PlayerSuggestions } from '../../components/PlayerSuggestions/PlayerSuggestions';
 import { gameApi } from '../../api/client';
 import { Cs2Data, User } from '../../api/types';
@@ -108,72 +109,75 @@ export const Cs2Page: React.FC<{ user?: User | null }> = ({ user }) => {
     const hasLinkedAccount = !!user?.faceitNickname;
 
     return (
-        <div className="cs2-page fade-in-up">
-            <div className="search-hero">
-                <h1 className="search-hero__title">
-                    <span className="search-hero__highlight search-hero__highlight--cs2" style={{ color: '#ffa500', textShadow: '0 0 20px rgba(255, 165, 0, 0.4)' }}>CS2</span> Tracker
-                </h1>
-                <p className="search-hero__subtitle">Find any player by Faceit Nickname</p>
+        <>
+            <PageBackground accent="cs2" />
+            <div className="cs2-page fade-in-up">
+                <div className="search-hero">
+                    <h1 className="search-hero__title">
+                        <span className="search-hero__highlight search-hero__highlight--cs2" style={{ color: '#ffa500', textShadow: '0 0 20px rgba(255, 165, 0, 0.4)' }}>CS2</span> Tracker
+                    </h1>
+                    <p className="search-hero__subtitle">Find any player by Faceit Nickname</p>
 
-                <Cs2SearchForm key={nickname} initialNickname={nickname} loading={loading} />
+                    <Cs2SearchForm key={nickname} initialNickname={nickname} loading={loading} />
 
-                {hasLinkedAccount && !data && !loading && (
-                    <div className="search-hero__quick-action">
-                        <button
-                            className="search-hero__quick-btn search-hero__quick-btn--cs2"
-                            onClick={() => navigate(cs2Path(user.faceitNickname!))}
-                        >
-                            ⚡ Load My Linked Profile ({user.faceitNickname})
-                        </button>
-                    </div>
+                    {hasLinkedAccount && !data && !loading && (
+                        <div className="search-hero__quick-action">
+                            <button
+                                className="search-hero__quick-btn search-hero__quick-btn--cs2"
+                                onClick={() => navigate(cs2Path(user.faceitNickname!))}
+                            >
+                                ⚡ Load My Linked Profile ({user.faceitNickname})
+                            </button>
+                        </div>
+                    )}
+
+                    {error && !loading && <div className="search-hero__error search-hero__error--cs2" role="alert">{error.message}</div>}
+                    {!data && !loading && (
+                        <PlayerSuggestions
+                            accent="cs2"
+                            items={[
+                                { label: 'ZywOo', hint: 'Vitality', path: cs2Path('ZywOo') },
+                                { label: 'donk666', hint: 'Team Spirit', path: cs2Path('donk666') },
+                                { label: 'm0NESY', hint: 'Falcons', path: cs2Path('m0NESY') },
+                            ]}
+                        />
+                    )}
+                </div>
+
+                {!loading && (
+                    <SearchMemoryPanel
+                        accent="cs2"
+                        gameLabel="CS2"
+                        recent={recent}
+                        favorites={favorites}
+                        current={currentShortcut}
+                        currentIsFavorite={currentIsFavorite}
+                        canSync={canSync}
+                        onSelect={handleShortcutSelect}
+                        onToggleFavorite={handleToggleFavorite}
+                        onRemoveFavorite={handleRemoveFavorite}
+                    />
                 )}
 
-                {error && !loading && <div className="search-hero__error search-hero__error--cs2" role="alert">{error.message}</div>}
-                {!data && !loading && (
-                    <PlayerSuggestions
-                        accent="cs2"
-                        items={[
-                            { label: 'ZywOo', hint: 'Vitality', path: cs2Path('ZywOo') },
-                            { label: 'donk666', hint: 'Team Spirit', path: cs2Path('donk666') },
-                            { label: 'm0NESY', hint: 'Falcons', path: cs2Path('m0NESY') },
-                        ]}
+                {loading && <SkeletonCard />}
+
+                {!loading && data && (
+                    <>
+                        <Cs2Card
+                            data={data}
+                            onMatchClick={(matchId) => setSelectedMatchId(matchId)}
+                        />
+                        <ProgressChart game="cs2" playerKey={data.profile.playerId} />
+                    </>
+                )}
+
+                {selectedMatchId && (
+                    <Cs2MatchModal
+                        matchId={selectedMatchId}
+                        onClose={() => setSelectedMatchId(null)}
                     />
                 )}
             </div>
-
-            {!loading && (
-                <SearchMemoryPanel
-                    accent="cs2"
-                    gameLabel="CS2"
-                    recent={recent}
-                    favorites={favorites}
-                    current={currentShortcut}
-                    currentIsFavorite={currentIsFavorite}
-                    canSync={canSync}
-                    onSelect={handleShortcutSelect}
-                    onToggleFavorite={handleToggleFavorite}
-                    onRemoveFavorite={handleRemoveFavorite}
-                />
-            )}
-
-            {loading && <SkeletonCard />}
-
-            {!loading && data && (
-                <>
-                    <Cs2Card
-                        data={data}
-                        onMatchClick={(matchId) => setSelectedMatchId(matchId)}
-                    />
-                    <ProgressChart game="cs2" playerKey={data.profile.playerId} />
-                </>
-            )}
-
-            {selectedMatchId && (
-                <Cs2MatchModal
-                    matchId={selectedMatchId}
-                    onClose={() => setSelectedMatchId(null)}
-                />
-            )}
-        </div>
+        </>
     );
 };

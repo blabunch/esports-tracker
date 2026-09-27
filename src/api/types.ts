@@ -154,9 +154,18 @@ export interface ProgressPoint {
     matches?: number | null;
 }
 
+export interface RecentPlayer {
+    game: ProgressGame;
+    playerKey: string;
+    displayName: string;
+    metrics: Omit<ProgressPoint, 'date'>;
+    updatedAt: string;
+}
+
 export interface Overview {
     playersTracked: number;
     profilesChecked24h: number;
+    recentPlayers: RecentPlayer[];
 }
 
 export interface User {

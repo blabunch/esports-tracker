@@ -8,7 +8,7 @@ import { valorantData } from '../../test/fixtures';
 afterEach(() => vi.restoreAllMocks());
 
 const mockCommon = () => {
-  vi.spyOn(gameApi, 'getOverview').mockResolvedValue({ playersTracked: 0, profilesChecked24h: 0 });
+  vi.spyOn(gameApi, 'getOverview').mockResolvedValue({ playersTracked: 0, profilesChecked24h: 0, recentPlayers: [] });
   vi.spyOn(gameApi, 'getProgress').mockResolvedValue([]);
 };
 

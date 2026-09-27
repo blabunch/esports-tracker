@@ -1,0 +1,100 @@
+.recent-players {
+    text-align: left;
+    margin-top: 40px;
+
+    &__title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 16px;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: var(--text-muted);
+    }
+
+    // Статична точка «наживо» — без нескінченної анімації, щоб не навантажувати сторінку
+    &__pulse {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #2ecc71;
+        box-shadow: 0 0 0 4px rgba(46, 204, 113, 0.15);
+    }
+
+    &__grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+}
+
+.recent-player {
+    --player-accent: 255, 70, 85;
+
+    &--dota { --player-accent: 217, 75, 56; }
+    &--cs2 { --player-accent: 255, 165, 0; }
+
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    padding: 12px 14px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-left: 3px solid rgba(var(--player-accent), 0.8);
+    background: rgba(255, 255, 255, 0.03);
+    color: #fff;
+    text-decoration: none;
+    animation: riseIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+    transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+
+    @for $i from 1 through 6 {
+        &:nth-child(#{$i}) { animation-delay: #{200 + $i * 60}ms; }
+    }
+
+    &:hover {
+        transform: translateY(-2px);
+        background: rgba(var(--player-accent), 0.08);
+        border-color: rgba(var(--player-accent), 0.35);
+        border-left-color: rgb(var(--player-accent));
+    }
+
+    &:focus-visible {
+        outline: 3px solid rgba(var(--player-accent), 0.6);
+        outline-offset: 2px;
+    }
+
+    &__game {
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: rgb(var(--player-accent));
+    }
+
+    &__name {
+        font-size: 15px;
+        font-weight: 800;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    &__meta {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-muted);
+        white-space: nowrap;
+    }
+
+    &__metric {
+        color: #fff;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}

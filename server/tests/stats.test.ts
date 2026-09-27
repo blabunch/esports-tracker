@@ -101,7 +101,10 @@ describe('CS2 stats', () => {
         expect(progress.body[0]).toMatchObject({ elo: 3500, level: 10, kd: 1.35, winRate: 60 });
 
         const overview = await api().get('/api/overview');
-        expect(overview.body).toEqual({ playersTracked: 1, profilesChecked24h: 1 });
+        expect(overview.body).toMatchObject({ playersTracked: 1, profilesChecked24h: 1 });
+        expect(overview.body.recentPlayers).toEqual([
+            expect.objectContaining({ game: 'cs2', playerKey: faceitPlayer.player_id, displayName: 'ZywOo' }),
+        ]);
     });
 
     it('maps upstream errors without leaking details', async () => {

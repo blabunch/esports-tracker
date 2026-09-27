@@ -106,16 +106,36 @@ export const getProgress = async (game: string, playerKey: string) => {
     }));
 };
 
+const RECENT_PLAYERS_LIMIT = 6;
+
 export const getOverview = async () => {
     const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
-    const [players, checkedToday] = await Promise.all([
+    const [players, checkedToday, latest] = await Promise.all([
         prisma.playerSnapshot.groupBy({ by: ['game', 'playerKey'] }),
         prisma.playerSnapshot.count({ where: { updatedAt: { gte: dayAgo } } }),
+        prisma.playerSnapshot.findMany({
+            orderBy: { updatedAt: 'desc' },
+            take: RECENT_PLAYERS_LIMIT * 5,
+            select: { game: true, playerKey: true, displayName: true, metrics: true, updatedAt: true },
+        }),
     ]);
+
+    // Один запис на гравця: знімки зберігаються щодня, тож той самий гравець може трапитись кілька разів
+    const seen = new Set<string>();
+    const recentPlayers = latest
+        .filter(snapshot => {
+            const key = `${snapshot.game}:${snapshot.playerKey}`;
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+        })
+        .slice(0, RECENT_PLAYERS_LIMIT)
+        .map(snapshot => ({ ...snapshot, updatedAt: snapshot.updatedAt.toISOString() }));
 
     return {
         playersTracked: players.length,
         profilesChecked24h: checkedToday,
+        recentPlayers,
     };
 };

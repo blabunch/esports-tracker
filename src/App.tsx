@@ -1,13 +1,15 @@
 import React, { Suspense, lazy, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
 
 import { ErrorBoundary } from './components/ErrorFallback/ErrorBoundary';
 import { Header } from './components/Header/Header';
+import { Footer } from './components/Footer/Footer';
 import { Home } from './pages/Home/Home';
 import { getMe } from './api/auth';
 import { User } from './api/types';
+import { queryClient } from './queryClient';
 import './App.scss';
 
 // Сторінки ігор вантажаться окремими чанками — головна відкривається швидше
@@ -17,17 +19,6 @@ const Cs2Page = lazy(() => import('./pages/Cs2/Cs2Page').then(m => ({ default: m
 const HistoryPage = lazy(() => import('./pages/History/HistoryPage').then(m => ({ default: m.HistoryPage })));
 const ProfilePage = lazy(() => import('./components/ProfilePage/ProfilePage').then(m => ({ default: m.ProfilePage })));
 const NotFoundPage = lazy(() => import('./pages/NotFound/NotFoundPage').then(m => ({ default: m.NotFoundPage })));
-
-const queryClient = new QueryClient({
-    defaultOptions: {
-        queries: {
-            // Помилки на кшталт "гравця не знайдено" немає сенсу повторювати
-            retry: false,
-            staleTime: 5 * 60 * 1000,
-            refetchOnWindowFocus: false,
-        },
-    },
-});
 
 const PageFallback = () => <div className="page-loading" role="status">Loading...</div>;
 
@@ -90,6 +81,7 @@ export const App: React.FC = () => {
                 </Routes>
               </Suspense>
             </main>
+            <Footer />
           </div>
         </Router>
       </QueryClientProvider>

@@ -1,4 +1,4 @@
-/* 🔥 АНІМОВАНИЙ БЕКГРАУНД (Microdots + Smooth Shimmer) 🔥 */
+/* Анімований фон — компонент PageBackground */
 .valorant-page {
     /* ФІКС БАГА: Тягнемо сторінку вгору під хедер, щоб не було дірки */
     margin-top: -100px;
@@ -11,67 +11,14 @@
     position: relative;
     min-height: 100vh;
     z-index: 1;
-    background-color: #09090b;
-    overflow: hidden; /* Щоб крапки не вилітали за межі сторінки і не створювали скрол */
+    background-color: transparent;
+    overflow: hidden;
 
     /* ПАТЕРН: Хаотичні літаючі мікродотси (Microdots) */
-    &::before {
-        content: '';
-        position: absolute;
-        top: -50px; left: -50px; right: -50px; bottom: -50px; /* Трохи виходимо за краї для плавності */
-        
-        /* 6 різних шарів крапок різного розміру та яскравості */
-        background-image:
-            radial-gradient(2px 2px at 40px 60px, rgba(255, 70, 85, 0.7), transparent),
-            radial-gradient(2.5px 2.5px at 150px 130px, rgba(255, 70, 85, 0.5), transparent),
-            radial-gradient(1.5px 1.5px at 250px 70px, rgba(255, 70, 85, 0.8), transparent),
-            radial-gradient(3px 3px at 320px 220px, rgba(255, 70, 85, 0.4), transparent),
-            radial-gradient(2px 2px at 80px 280px, rgba(255, 70, 85, 0.9), transparent),
-            radial-gradient(2.5px 2.5px at 200px 350px, rgba(255, 70, 85, 0.6), transparent);
-        
-        /* Кожен шар має свій розмір патерну, щоб уникнути симетрії */
-        background-size: 350px 350px, 400px 400px, 300px 300px, 450px 450px, 380px 380px, 420px 420px;
-        background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0;
-        
-        z-index: -2;
-        pointer-events: none;
-        /* Запускаємо хаотичний рух */
-        animation: chaoticDots 50s linear infinite;
-    }
-
     /* ЕФЕКТ: Smooth Shimmer (Плавне світіння на фоні) */
-    &::after {
-        content: '';
-        position: absolute;
-        top: 0; left: 0; right: 0; bottom: 0;
-        background: radial-gradient(circle at 50% 50%, rgba(255, 70, 85, 0.08) 0%, transparent 60%);
-        background-size: 200% 200%;
-        z-index: -1;
-        pointer-events: none;
-        animation: valorantShimmer 15s ease-in-out infinite alternate;
-    }
-}
-
-/* 🔥 АНІМАЦІЯ: Шари крапок рухаються в абсолютно різних напрямках */
-@keyframes chaoticDots {
-    100% {
-        background-position:
-            350px -350px,   /* Рух вгору-вправо */
-            -400px 400px,   /* Рух вниз-вліво */
-            300px 300px,    /* Рух вниз-вправо */
-            -450px -450px,  /* Рух вгору-вліво */
-            380px -380px,   /* Рух вгору-вправо повільно */
-            -420px 420px;   /* Рух вниз-вліво повільно */
-    }
 }
 
 /* Ключові кадри для пульсації світіння */
-@keyframes valorantShimmer {
-    0% { background-position: 0% 0%; opacity: 0.5; }
-    50% { background-position: 100% 100%; transform: scale(1.2); opacity: 1; }
-    100% { background-position: 0% 100%; transform: scale(1); opacity: 0.5; }
-}
-
 .valorant-page .search-hero {
     text-align: center; margin-bottom: 40px; width: 100%; max-width: 750px;
 

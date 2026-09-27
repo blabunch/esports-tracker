@@ -6,6 +6,7 @@ import { MatchModal } from '../../components/MatchModal/MatchModal';
 import { SkeletonCard } from '../../components/Skeleton/Skeleton';
 import { SearchMemoryPanel } from '../../components/SearchMemoryPanel/SearchMemoryPanel';
 import { ProgressChart } from '../../components/ProgressChart/ProgressChart';
+import { PageBackground } from '../../components/PageBackground/PageBackground';
 import { gameApi } from '../../api/client';
 import { User, ValorantData } from '../../api/types';
 import { ProfileShortcut, useProfileShortcuts } from '../../hooks/useProfileShortcuts';
@@ -121,67 +122,70 @@ export const ValorantPage: React.FC<{ user?: User | null }> = ({ user }) => {
     const hasLinkedAccount = user?.valName && user?.valTag;
 
     return (
-        <div className="valorant-page fade-in-up">
-            <div className="search-hero">
-                <h1 className="search-hero__title">
-                    <span className="search-hero__highlight search-hero__highlight--val">Valorant</span> Tracker
-                </h1>
-                <p className="search-hero__subtitle">Find any player by Riot ID and Tag</p>
+        <>
+            <PageBackground accent="valorant" />
+            <div className="valorant-page fade-in-up">
+                <div className="search-hero">
+                    <h1 className="search-hero__title">
+                        <span className="search-hero__highlight search-hero__highlight--val">Valorant</span> Tracker
+                    </h1>
+                    <p className="search-hero__subtitle">Find any player by Riot ID and Tag</p>
 
-                <ValorantSearchForm key={`${name}#${tag}`} initialName={name} initialTag={tag} loading={loading} />
+                    <ValorantSearchForm key={`${name}#${tag}`} initialName={name} initialTag={tag} loading={loading} />
 
-                {hasLinkedAccount && !data && !loading && (
-                    <div className="search-hero__quick-action">
-                        <button
-                            className="search-hero__quick-btn search-hero__quick-btn--val"
-                            onClick={() => navigate(valorantPath(user.valName!, user.valTag!))}
-                        >
-                            ⚡ Load My Linked Profile ({user.valName}#{user.valTag})
-                        </button>
-                    </div>
+                    {hasLinkedAccount && !data && !loading && (
+                        <div className="search-hero__quick-action">
+                            <button
+                                className="search-hero__quick-btn search-hero__quick-btn--val"
+                                onClick={() => navigate(valorantPath(user.valName!, user.valTag!))}
+                            >
+                                ⚡ Load My Linked Profile ({user.valName}#{user.valTag})
+                            </button>
+                        </div>
+                    )}
+
+                    {error && !loading && <div className="search-hero__error search-hero__error--val" role="alert">{error.message}</div>}
+                    {!data && !loading && (
+                        <p className="search-hero__hint">
+                            Your Riot ID looks like <strong>Name#TAG</strong> — find it in the Valorant client next to your profile picture.
+                        </p>
+                    )}
+                </div>
+
+                {!loading && (
+                    <SearchMemoryPanel
+                        accent="valorant"
+                        gameLabel="Valorant"
+                        recent={recent}
+                        favorites={favorites}
+                        current={currentShortcut}
+                        currentIsFavorite={currentIsFavorite}
+                        canSync={canSync}
+                        onSelect={handleShortcutSelect}
+                        onToggleFavorite={handleToggleFavorite}
+                        onRemoveFavorite={handleRemoveFavorite}
+                    />
                 )}
 
-                {error && !loading && <div className="search-hero__error search-hero__error--val" role="alert">{error.message}</div>}
-                {!data && !loading && (
-                    <p className="search-hero__hint">
-                        Your Riot ID looks like <strong>Name#TAG</strong> — find it in the Valorant client next to your profile picture.
-                    </p>
+                {loading && <SkeletonCard />}
+
+                {!loading && data && (
+                    <>
+                        <ValorantCard
+                            data={data}
+                            onMatchClick={(matchId) => setSelectedMatchId(matchId)}
+                        />
+                        <ProgressChart game="valorant" playerKey={`${data.profile.nickname}#${data.profile.tag}`} />
+                    </>
+                )}
+
+                {selectedMatchId && (
+                    <MatchModal
+                        matchId={selectedMatchId}
+                        onClose={() => setSelectedMatchId(null)}
+                    />
                 )}
             </div>
-
-            {!loading && (
-                <SearchMemoryPanel
-                    accent="valorant"
-                    gameLabel="Valorant"
-                    recent={recent}
-                    favorites={favorites}
-                    current={currentShortcut}
-                    currentIsFavorite={currentIsFavorite}
-                    canSync={canSync}
-                    onSelect={handleShortcutSelect}
-                    onToggleFavorite={handleToggleFavorite}
-                    onRemoveFavorite={handleRemoveFavorite}
-                />
-            )}
-
-            {loading && <SkeletonCard />}
-
-            {!loading && data && (
-                <>
-                    <ValorantCard
-                        data={data}
-                        onMatchClick={(matchId) => setSelectedMatchId(matchId)}
-                    />
-                    <ProgressChart game="valorant" playerKey={`${data.profile.nickname}#${data.profile.tag}`} />
-                </>
-            )}
-
-            {selectedMatchId && (
-                <MatchModal
-                    matchId={selectedMatchId}
-                    onClose={() => setSelectedMatchId(null)}
-                />
-            )}
-        </div>
+        </>
     );
 };

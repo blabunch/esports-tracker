@@ -6,6 +6,7 @@ import { User } from '../../api/types';
 import { cs2Path, dotaPath, valorantPath } from '../../routes';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import { useCountUp } from '../../hooks/useCountUp';
+import { RecentPlayers } from '../../components/RecentPlayers/RecentPlayers';
 import './Home.scss';
 
 const formatCount = (value?: number) => (value === undefined ? '—' : new Intl.NumberFormat('en-US').format(value));
@@ -61,6 +62,8 @@ export const Home: React.FC<{ user?: User | null }> = ({ user }) => {
                             <p>Profiles Checked (24h)</p>
                         </div>
                     </div>
+
+                    <RecentPlayers players={overview?.recentPlayers || []} />
                 </div>
 
                 {/* 👉 ПРАВА КОЛОНКА */}

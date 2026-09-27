@@ -1,0 +1,57 @@
+.page-bg {
+    --bg-accent: 255, 70, 85;
+
+    &--dota { --bg-accent: 217, 75, 56; }
+    &--cs2 { --bg-accent: 255, 165, 0; }
+
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+    background: var(--bg-dark);
+    // Зміни всередині шару не змушують браузер перераховувати решту сторінки
+    contain: strict;
+
+    // Безперервна анімація змушує браузер малювати 60 кадрів/с навіть у спокої (~25% CPU),
+    // тому фон лише плавно з'являється при відкритті сторінки, а потім нерухомий
+    &__dots {
+        position: absolute;
+        inset: 0;
+    }
+
+    &__dots--a {
+        background-image:
+            radial-gradient(2px 2px at 40px 60px, rgba(var(--bg-accent), 0.7), transparent),
+            radial-gradient(1.5px 1.5px at 250px 70px, rgba(var(--bg-accent), 0.8), transparent),
+            radial-gradient(2px 2px at 80px 280px, rgba(var(--bg-accent), 0.9), transparent);
+        background-size: 350px 350px;
+        animation: pageDotsIn 1.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    &__dots--b {
+        background-image:
+            radial-gradient(2.5px 2.5px at 150px 130px, rgba(var(--bg-accent), 0.5), transparent),
+            radial-gradient(3px 3px at 320px 220px, rgba(var(--bg-accent), 0.4), transparent),
+            radial-gradient(2.5px 2.5px at 200px 350px, rgba(var(--bg-accent), 0.6), transparent);
+        background-size: 420px 420px;
+        animation: pageDotsIn 1.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+    }
+
+    &__glow {
+        position: absolute;
+        inset: -10%;
+        background: radial-gradient(circle at 50% 35%, rgba(var(--bg-accent), 0.1) 0%, transparent 55%);
+        animation: pageGlowIn 1.6s ease-out both;
+    }
+}
+
+@keyframes pageDotsIn {
+    from { opacity: 0; transform: translate3d(0, 24px, 0); }
+    to { opacity: 1; transform: none; }
+}
+
+@keyframes pageGlowIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: none; }
+}

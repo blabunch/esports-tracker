@@ -6,7 +6,7 @@
     /* --- ПРОФІЛЬ ХЕДЕР --- */
     &__header {
         display: flex; align-items: center; gap: 32px; margin-bottom: 40px;
-        background: rgba(26, 26, 36, 0.4); backdrop-filter: blur(24px);
+        background: rgba(17, 17, 23, 0.94);
         border: 1px solid var(--glass-border); padding: 40px; border-radius: 32px;
         box-shadow: 0 20px 40px rgba(0,0,0,0.3);
     }
