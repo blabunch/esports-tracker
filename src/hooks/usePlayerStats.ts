@@ -5,8 +5,9 @@ interface PlayerStatsOptions<T> {
     queryKey: readonly unknown[];
     enabled: boolean;
     fetcher: () => Promise<T>;
-    // Що записати в історію пошуку, якщо користувач залогінений
-    history?: { game: string; query: string; isLoggedIn: boolean };
+    // Що записати в історію пошуку, якщо користувач залогінений. Запис будується з відповіді API,
+    // а не з введеного тексту: так "huilan#zxc" і "HuiLan#zxc" або посилання на Steam не дублюються
+    history?: { game: string; isLoggedIn: boolean; entry: (data: T) => { query: string; label?: string } };
 }
 
 export const usePlayerStats = <T,>({ queryKey, enabled, fetcher, history }: PlayerStatsOptions<T>) => {
@@ -19,7 +20,8 @@ export const usePlayerStats = <T,>({ queryKey, enabled, fetcher, history }: Play
             const data = await fetcher();
 
             if (history?.isLoggedIn) {
-                gameApi.saveHistory(history.game, history.query)
+                const { query, label } = history.entry(data);
+                gameApi.saveHistory(history.game, query, label)
                     .then(() => queryClient.invalidateQueries({ queryKey: ['history'] }))
                     .catch(() => undefined);
             }

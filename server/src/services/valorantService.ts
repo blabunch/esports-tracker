@@ -3,6 +3,31 @@ import { HttpError, toUpstreamError } from "../utils/httpError";
 
 const HENRIKDEV_API_KEY = process.env.HENRIKDEV_API_KEY;
 const VALORANT_MATCH_LIMIT = 10;
+const MAP_IMAGES_TTL = 1000 * 60 * 60 * 24; // 24 години
+
+// Картинки карт беремо з публічного valorant-api.com (без ключа) і кешуємо на добу
+let mapImagesCache: { byName: Record<string, string>; fetchedAt: number } | null = null;
+
+const getMapImages = async (): Promise<Record<string, string>> => {
+  if (mapImagesCache && Date.now() - mapImagesCache.fetchedAt < MAP_IMAGES_TTL) {
+    return mapImagesCache.byName;
+  }
+  try {
+    const res = await http.get("https://valorant-api.com/v1/maps");
+    const byName: Record<string, string> = {};
+    for (const map of res.data?.data || []) {
+      if (map.displayName && (map.listViewIcon || map.splash)) {
+        byName[String(map.displayName).toLowerCase()] = map.listViewIcon || map.splash;
+      }
+    }
+    mapImagesCache = { byName, fetchedAt: Date.now() };
+    return byName;
+  } catch (error: any) {
+    // Без картинок карта просто покаже градієнт — профіль від цього не має падати
+    console.warn("⚠️ valorant-api.com maps unavailable:", error.message);
+    return mapImagesCache?.byName || {};
+  }
+};
 
 const getAgentRole = (agentName: string) => {
   const duelists = ["Jett", "Reyna", "Raze", "Phoenix", "Yoru", "Neon", "Iso"];
@@ -123,16 +148,19 @@ export const getValorantStats = async (
     const account = accountRes.data.data;
     const region = encodeURIComponent(account.region || "eu");
 
-    // 2. MMR та Матчі
-    const [mmrResult, matchesResult] = await Promise.allSettled([
-      http.get(
-        `https://api.henrikdev.xyz/valorant/v1/mmr/${region}/${encodeURIComponent(name)}/${encodeURIComponent(tag)}`,
-        { headers },
-      ),
-      http.get(
-        `https://api.henrikdev.xyz/valorant/v3/matches/${region}/${encodeURIComponent(name)}/${encodeURIComponent(tag)}?size=${VALORANT_MATCH_LIMIT}`,
-        { headers },
-      ),
+    // 2. MMR, матчі та картинки карт
+    const [[mmrResult, matchesResult], mapImages] = await Promise.all([
+      Promise.allSettled([
+        http.get(
+          `https://api.henrikdev.xyz/valorant/v1/mmr/${region}/${encodeURIComponent(name)}/${encodeURIComponent(tag)}`,
+          { headers },
+        ),
+        http.get(
+          `https://api.henrikdev.xyz/valorant/v3/matches/${region}/${encodeURIComponent(name)}/${encodeURIComponent(tag)}?size=${VALORANT_MATCH_LIMIT}`,
+          { headers },
+        ),
+      ]),
+      getMapImages(),
     ]);
 
     const mmr =
@@ -174,7 +202,7 @@ export const getValorantStats = async (
     const mapCounts: Record<string, { matches: number; wins: number }> = {};
     const allyCounts: Record<
       string,
-      { name: string; tag: string; count: number; wins: number }
+      { name: string; tag: string; card: string; count: number; wins: number }
     > = {};
     const recentResults: string[] = [];
     const chartData: any[] = [];
@@ -246,6 +274,7 @@ export const getValorantStats = async (
             allyCounts[p.puuid] = {
               name: p.name,
               tag: p.tag,
+              card: p.assets?.card?.small || "",
               count: 0,
               wins: 0,
             };
@@ -273,6 +302,7 @@ export const getValorantStats = async (
       frequentDuo = {
         name: bestAlly.name,
         tag: bestAlly.tag,
+        avatar: bestAlly.card || null,
         count: bestAlly.count,
         winRate: ((bestAlly.wins / bestAlly.count) * 100).toFixed(0),
       };
@@ -299,6 +329,7 @@ export const getValorantStats = async (
       .slice(0, 4)
       .map(([name, data]) => ({
         name,
+        img: mapImages[name.toLowerCase()] || "",
         matches: data.matches,
         wins: data.wins,
         winRate: safePercent(data.wins, data.matches),

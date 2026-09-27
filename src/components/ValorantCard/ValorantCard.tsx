@@ -95,7 +95,9 @@ export const ValorantCard: React.FC<ValorantCardProps> = ({ data, onMatchClick }
           <div className="val-card__duo">
             <span className="val-card__duo-label">Best Teammate</span>
             <div className="val-card__duo-player">
-              <div className="duo-avatar">👤</div>
+              {data.stats.frequentDuo.avatar && (
+                <img className="duo-avatar" src={data.stats.frequentDuo.avatar} alt="" loading="lazy" />
+              )}
               <div className="val-card__duo-info">
                 <p className="name">{data.stats.frequentDuo.name} <span className="tag">#{data.stats.frequentDuo.tag}</span></p>
                 <p className="stats">{data.stats.frequentDuo.winRate}% WR ({data.stats.frequentDuo.count} games)</p>
@@ -211,8 +213,12 @@ export const ValorantCard: React.FC<ValorantCardProps> = ({ data, onMatchClick }
               <span>{mapStats.length} maps from recent sample</span>
             </div>
             <div className="val-card__maps-grid">
-              {mapStats.map((map: any) => (
-                <div key={map.name} className="val-map">
+              {mapStats.map(map => (
+                <div
+                  key={map.name}
+                  className={`val-map ${map.img ? 'has-image' : ''}`}
+                  style={map.img ? { backgroundImage: `linear-gradient(to top, rgba(9, 9, 11, 0.95) 15%, rgba(9, 9, 11, 0.35)), url(${map.img})` } : undefined}
+                >
                   <span className="val-map__name">{map.name}</span>
                   <strong className={Number(map.winRate) >= 50 ? 'is-good' : 'is-bad'}>{formatStat(map.winRate, '%')} WR</strong>
                   <span className="val-map__meta">{map.wins}/{map.matches} wins</span>

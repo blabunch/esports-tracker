@@ -150,6 +150,22 @@ export const createApp = () => {
                 where: { userId: req.user.userId },
                 orderBy: { createdAt: 'desc' }
             });
+
+            // Старі записи Dota зберігали лише числовий ID — підставляємо нікнейм зі знімків прогресу
+            const unlabeledDotaIds = history
+                .filter(entry => entry.game === 'Dota 2' && !entry.label && /^\d+$/.test(entry.query))
+                .map(entry => entry.query);
+            if (unlabeledDotaIds.length > 0) {
+                const snapshots = await prisma.playerSnapshot.findMany({
+                    where: { game: 'dota', playerKey: { in: unlabeledDotaIds } },
+                    orderBy: { updatedAt: 'desc' },
+                    select: { playerKey: true, displayName: true },
+                });
+                const names = new Map<string, string>();
+                snapshots.forEach(snapshot => { if (!names.has(snapshot.playerKey)) names.set(snapshot.playerKey, snapshot.displayName); });
+                history.forEach(entry => { if (!entry.label && names.has(entry.query)) entry.label = names.get(entry.query)!; });
+            }
+
             res.json(history);
         } catch (error) { next(error); }
     });
@@ -160,6 +176,7 @@ export const createApp = () => {
             const game = readText(req.body?.game);
             const query = readText(req.body?.query);
             const mode = req.body?.mode === undefined ? null : readText(req.body.mode);
+            const label = req.body?.label === undefined ? null : readText(req.body.label);
 
             if (!game || !query) {
                 return res.status(400).json({ message: 'Game and query are required' });
@@ -167,8 +184,8 @@ export const createApp = () => {
 
             const entry = await prisma.searchHistory.upsert({
                 where: { userId_game_query: { userId, game, query } },
-                update: { createdAt: new Date(), mode },
-                create: { game, query, mode, userId }
+                update: { createdAt: new Date(), mode, ...(label ? { label } : {}) },
+                create: { game, query, label, mode, userId }
             });
             res.json(entry);
         } catch (error) { next(error); }

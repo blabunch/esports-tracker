@@ -53,10 +53,10 @@ const historyToShortcut = (game: GameShortcutKey, item: SearchHistoryItem): Prof
     }
 
     if (game === 'dota') {
-        return { id: `dota:${query}`, label: query, subtitle: 'Steam 32-bit ID', payload: { id: query }, updatedAt };
+        return { id: `dota:${query}`, label: item.label || query, subtitle: item.label ? `Steam ID ${query}` : 'Steam 32-bit ID', payload: { id: query }, updatedAt };
     }
 
-    return { id: `cs2:${query.toLowerCase()}`, label: query, subtitle: 'Faceit nickname', payload: { nickname: query }, updatedAt };
+    return { id: `cs2:${query.toLowerCase()}`, label: item.label || query, subtitle: 'Faceit nickname', payload: { nickname: query }, updatedAt };
 };
 
 export const useProfileShortcuts = (game: GameShortcutKey, user?: { id?: number } | null) => {

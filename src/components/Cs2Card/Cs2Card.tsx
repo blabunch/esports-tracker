@@ -150,7 +150,7 @@ export const Cs2Card: React.FC<Cs2CardProps> = ({ data, onMatchClick }) => {
           <div className="cs2-card__maps">
             {data.stats.topMaps.map((m: any) => (
               <div key={m.name} className={`cs2-map cs2-map--${normalizeMapName(m.name)}`} style={getMapStyle(m.name, m.img)}>
-                <div className="cs2-map__pattern" aria-hidden="true" />
+                {!m.img && <div className="cs2-map__pattern" aria-hidden="true" />}
                 <div className="cs2-map__glass">
                   <span className="cs2-map__name">{m.name.replace('de_', '').toUpperCase()}</span>
                   <div className="cs2-map__stats">

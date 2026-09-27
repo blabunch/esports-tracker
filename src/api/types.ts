@@ -109,10 +109,10 @@ export interface ValorantData {
         hs: string | number;
         role: string;
         maxKills: number | string;
-        frequentDuo: { name: string; tag: string; count: number; winRate: string } | null;
+        frequentDuo: { name: string; tag: string; avatar?: string | null; count: number; winRate: string } | null;
         recent: string[];
         topAgents: Array<{ name: string; img: string; count: number }>;
-        mapStats?: Array<{ name: string; matches: number; wins: number; winRate: string | number }>;
+        mapStats?: Array<{ name: string; img?: string; matches: number; wins: number; winRate: string | number }>;
         chartData: ChartPoint[];
         hasMatches?: boolean;
         matchLimit?: number;
@@ -126,6 +126,7 @@ export interface SearchHistoryItem {
     userId: number;
     game: string;
     query: string;
+    label?: string | null;
     mode?: string;
     createdAt: string;
 }

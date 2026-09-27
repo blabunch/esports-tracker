@@ -75,6 +75,7 @@
     &__date { color: var(--text-muted); font-size: 13px; font-weight: 500; }
 
     &__query { font-size: 24px; font-weight: 800; color: #fff; margin-bottom: 24px; word-break: break-all; }
+    &__id { display: block; margin: -18px 0 20px; font-size: 13px; font-weight: 600; color: var(--text-muted); }
 
     &__action {
         display: flex; justify-content: space-between; align-items: center; margin-top: auto;

@@ -20,8 +20,8 @@ const faceitStats = {
         'Average Headshots %': '45', Headshots: '900', 'Longest Win Streak': '8', 'Current Win Streak': '2',
     },
     segments: [
-        { mode: '5v5', label: 'Mirage', image_url: '', stats: { Matches: '40', 'Win Rate %': '65', 'Average K/D Ratio': '1.4' } },
-        { mode: '5v5', label: 'Inferno', image_url: '', stats: { Matches: '30', 'Win Rate %': '55', 'Average K/D Ratio': '1.2' } },
+        { mode: '5v5', label: 'Mirage', img_regular: 'https://cdn.test/mirage.jpg', img_small: 'https://cdn.test/mirage-small.jpg', stats: { Matches: '40', 'Win Rate %': '65', 'Average K/D Ratio': '1.4' } },
+        { mode: '5v5', label: 'Inferno', img_small: 'https://cdn.test/inferno-small.jpg', stats: { Matches: '30', 'Win Rate %': '55', 'Average K/D Ratio': '1.2' } },
     ],
 };
 
@@ -75,6 +75,10 @@ describe('CS2 stats', () => {
             membership: 'Premium',
         });
         expect(res.body.stats.topMaps.map((map: { name: string }) => map.name)).toEqual(['Mirage', 'Inferno']);
+        expect(res.body.stats.topMaps.map((map: { img: string }) => map.img)).toEqual([
+            'https://cdn.test/mirage.jpg',
+            'https://cdn.test/inferno-small.jpg',
+        ]);
         expect(res.body.stats.recentResults).toEqual(['1', '0']);
         expect(res.body.stats.recentWinRate).toBe('50.0');
     });
@@ -183,5 +187,35 @@ describe('Valorant stats', () => {
 
         expect(res.status).toBe(404);
         expect(res.body.message).toContain(message);
+    });
+});
+
+describe('Valorant profile data', () => {
+    const me = { puuid: 'me', name: 'Hero', tag: 'EU1', team: 'Red', character: 'Jett', assets: { agent: { small: '' }, card: { small: '' } }, damage_made: 1500,
+        stats: { kills: 20, deaths: 10, assists: 5, score: 5000, headshots: 10, bodyshots: 20, legshots: 2 } };
+    const ally = { puuid: 'ally', name: 'Buddy', tag: 'TIP', team: 'Red', assets: { card: { small: 'https://cdn.test/buddy-card.png' } } };
+    const match = (id: string, map: string) => ({
+        metadata: { matchid: id, map, rounds_played: 20 },
+        players: { all_players: [me, ally] },
+        teams: { red: { has_won: true, rounds_won: 13 }, blue: { has_won: false, rounds_won: 7 } },
+    });
+
+    it('adds map images and the best teammate avatar', async () => {
+        vi.spyOn(http, 'get').mockImplementation(async (url: string) => {
+            if (url.includes('/v1/account/')) return { data: { data: { puuid: 'me', name: 'Hero', tag: 'EU1', region: 'eu', account_level: 100, card: { small: '' } } } };
+            if (url.includes('/v1/mmr/')) return { data: { data: { currenttierpatched: 'Gold 2', elo: 1200 } } };
+            if (url.includes('/v3/matches/')) return { data: { data: [match('m1', 'Ascent'), match('m2', 'Ascent'), match('m3', 'Bind')] } };
+            if (url.includes('valorant-api.com/v1/maps')) return { data: { data: [{ displayName: 'Ascent', listViewIcon: 'https://cdn.test/ascent.png' }] } };
+            throw new Error(`Unexpected URL ${url}`);
+        });
+
+        const res = await api().get('/api/valorant/Hero/EU1');
+
+        expect(res.status).toBe(200);
+        expect(res.body.stats.frequentDuo).toMatchObject({ name: 'Buddy', tag: 'TIP', avatar: 'https://cdn.test/buddy-card.png', count: 3 });
+        expect(res.body.stats.mapStats).toEqual([
+            expect.objectContaining({ name: 'Ascent', img: 'https://cdn.test/ascent.png', matches: 2 }),
+            expect.objectContaining({ name: 'Bind', img: '', matches: 1 }),
+        ]);
     });
 });

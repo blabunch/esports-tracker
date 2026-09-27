@@ -43,7 +43,8 @@ export const getFaceitStats = async (rawNickname: string, game: string = 'cs2'):
             .filter((seg: any) => seg.mode === '5v5')
             .map((seg: any) => ({
                 name: seg.label,
-                img: seg.image_url || '',
+                // FACEIT віддає картинки карт у img_regular / img_small (поля image_url не існує)
+                img: seg.img_regular || seg.img_small || '',
                 matches: Number(seg.stats.Matches),
                 winRate: seg.stats['Win Rate %'],
                 kd: Number(seg.stats['Average K/D Ratio'])

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { api, registerUser } from './helpers';
+import { prisma } from '../src/db';
 
 describe('search history', () => {
     it('requires authentication', async () => {
@@ -21,6 +22,22 @@ describe('search history', () => {
         expect(aliceHistory.body).toHaveLength(2);
         expect(aliceHistory.body[0].query).toBe('86745912');
         expect(bobHistory.body).toHaveLength(0);
+    });
+
+    it('stores a display label and backfills Dota nicknames from snapshots', async () => {
+        const { token } = await registerUser();
+        const auth = { Authorization: `Bearer ${token}` };
+
+        await api().post('/api/history').set(auth).send({ game: 'CS2', query: 'zywoo', label: 'ZywOo' });
+        await api().post('/api/history').set(auth).send({ game: 'Dota 2', query: '1048212948' });
+        await prisma.playerSnapshot.create({
+            data: { game: 'dota', playerKey: '1048212948', displayName: 'Miracle-', day: new Date('2026-09-27'), metrics: {} },
+        });
+
+        const history = (await api().get('/api/history').set(auth)).body;
+
+        expect(history.find((e: { query: string }) => e.query === 'zywoo').label).toBe('ZywOo');
+        expect(history.find((e: { query: string }) => e.query === '1048212948').label).toBe('Miracle-');
     });
 
     it('rejects invalid entries', async () => {

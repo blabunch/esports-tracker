@@ -11,6 +11,8 @@ model SearchHistory {
   id        Int      @id @default(autoincrement())
   game      String
   query     String
+  // Відображуване ім'я гравця (напр. нікнейм Dota замість числового ID)
+  label     String?
   mode      String?
   createdAt DateTime @default(now())
   userId    Int?

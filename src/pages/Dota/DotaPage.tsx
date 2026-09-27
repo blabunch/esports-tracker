@@ -74,7 +74,11 @@ export const DotaPage: React.FC<{ user?: User | null }> = ({ user }) => {
         queryKey: ['dota', id],
         enabled: Boolean(id),
         fetcher: () => gameApi.getDota(id),
-        history: { game: HISTORY_GAME.dota, query: id, isLoggedIn: canSync },
+        history: {
+            game: HISTORY_GAME.dota,
+            isLoggedIn: canSync,
+            entry: result => ({ query: String(result.profile.accountId), label: result.profile.nickname }),
+        },
     });
 
     useDocumentTitle(data ? `${data.profile.nickname} · Dota 2` : 'Dota 2 Tracker');

@@ -95,7 +95,10 @@ export const HistoryPage: React.FC<{ user?: User | null }> = ({ user }) => {
                                     <span className="history-card__game">{entry.game}</span>
                                     <span className="history-card__date">{formatDate(entry.createdAt)}</span>
                                 </div>
-                                <h3 className="history-card__query">{entry.query}</h3>
+                                <h3 className="history-card__query">{entry.label || entry.query}</h3>
+                                {entry.label && entry.label !== entry.query && (
+                                    <span className="history-card__id">{entry.game === 'Dota 2' ? `Steam ID ${entry.query}` : entry.query}</span>
+                                )}
                                 <div className="history-card__action">
                                     <span>Click to view stats</span>
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>

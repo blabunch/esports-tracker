@@ -82,8 +82,8 @@ export const gameApi = {
         const { data } = await API.get<SearchHistoryItem[]>('/history', { silent: true });
         return data;
     },
-    saveHistory: async (game: string, query: string): Promise<void> => {
-        await API.post('/history', { game, query }, { silent: true });
+    saveHistory: async (game: string, query: string, label?: string): Promise<void> => {
+        await API.post('/history', { game, query, label }, { silent: true });
     },
     clearHistory: async (): Promise<void> => {
         await API.delete('/history');

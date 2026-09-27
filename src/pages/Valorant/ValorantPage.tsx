@@ -83,7 +83,11 @@ export const ValorantPage: React.FC<{ user?: User | null }> = ({ user }) => {
         queryKey: ['valorant', name.toLowerCase(), tag.toLowerCase()],
         enabled: Boolean(name && tag),
         fetcher: () => gameApi.getValorant(name, tag),
-        history: { game: HISTORY_GAME.valorant, query: `${name}#${tag}`, isLoggedIn: canSync },
+        history: {
+            game: HISTORY_GAME.valorant,
+            isLoggedIn: canSync,
+            entry: result => ({ query: `${result.profile.nickname}#${result.profile.tag}` }),
+        },
     });
 
     useDocumentTitle(data ? `${data.profile.nickname}#${data.profile.tag} · Valorant` : 'Valorant Tracker');

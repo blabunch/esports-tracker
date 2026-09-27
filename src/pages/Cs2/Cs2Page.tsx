@@ -70,7 +70,7 @@ export const Cs2Page: React.FC<{ user?: User | null }> = ({ user }) => {
         queryKey: ['cs2', nickname.toLowerCase()],
         enabled: Boolean(nickname),
         fetcher: () => gameApi.getCs2(nickname),
-        history: { game: HISTORY_GAME.cs2, query: nickname, isLoggedIn: canSync },
+        history: { game: HISTORY_GAME.cs2, isLoggedIn: canSync, entry: result => ({ query: result.profile.nickname }) },
     });
 
     useDocumentTitle(data ? `${data.profile.nickname} · CS2` : 'CS2 Tracker');
